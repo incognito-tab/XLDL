@@ -3,3 +3,6 @@
 logs/*
 data/*
 *.log
+.venv/
+bench_out/
+__pycache__/

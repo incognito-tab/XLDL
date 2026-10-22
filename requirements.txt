@@ -1,7 +1,7 @@
 torch
 torchvision
 tensorboard
-spikingjelly
+spikingjelly==0.0.0.0.14
 ml_collections
 einops
 timm
