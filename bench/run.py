@@ -24,7 +24,7 @@ from bench.nets import DMPSNN, MixerSNN, lif_modules, reset_states
 
 # per-model optimiser defaults: AdamW + cosine; DMP lr/wd follow the DMP SHD script
 OPT_DEFAULTS = {'mixer': dict(lr=1e-3, wd=0.01), 'dmp': dict(lr=5e-3, wd=0.1)}
-EPOCH_DEFAULTS = {'fmnist': 15, 'fmnist_stream': 15, 'cifar10': 30, 'shd': 60, 'recall': 30}
+EPOCH_DEFAULTS = {'fmnist': 15, 'fmnist_stream': 15, 'cifar10': 30, 'shd': 60, 'shd20': 30, 'recall': 30}
 THETA_DEFAULTS = {'shd': 40}              # DMP SHD setting; elsewhere theta = sequence length
 
 
@@ -40,13 +40,14 @@ def parse():
     p.add_argument('--data-root', default='./data')
     p.add_argument('--out', default='./bench_out')
     p.add_argument('--tag', default='', help='suffix that distinguishes ablation runs')
-    p.add_argument('--max-train', type=int, default=0, help='subsample training set (smoke tests)')
+    p.add_argument('--max-train', type=int, default=0, help='random fixed subset of the training set (CPU budget)')
+    p.add_argument('--max-val', type=int, default=0, help='random fixed subset of the validation set')
     p.add_argument('--time-limit', type=float, default=0, help='minutes; save and exit(3) when exceeded')
     # recall task
     p.add_argument('--delay', type=int, default=50)
     p.add_argument('--distractors', type=int, default=2)
     # Mixer-SNN
-    p.add_argument('--mixer-size', default='small', choices=['small', 'lite'])
+    p.add_argument('--mixer-size', default='small', choices=['small', 'lite', 'micro'])
     p.add_argument('--T', type=int, default=4, help='repetitions of a static image')
     p.add_argument('--tau', type=float, default=2.0, help='LIF time constant of every Mixer neuron')
     p.add_argument('--no-amp', action='store_true')
@@ -121,8 +122,11 @@ def main():
     b = D.get(a.dataset, a.data_root, a.seed, a.delay, a.distractors)
     if a.theta is None:
         a.theta = float(THETA_DEFAULTS.get(a.dataset, b.T_dmp))
-    if a.max_train:
-        b.train = D.Split(b.train.x[:a.max_train], b.train.y[:a.max_train])
+    for s_name, cap in (('train', a.max_train), ('val', a.max_val)):  # same subset for every model/seed
+        sp = getattr(b, s_name)
+        if cap and cap < len(sp.y):
+            keep = torch.randperm(len(sp.y), generator=torch.Generator().manual_seed(1234))[:cap]
+            setattr(b, s_name, D.Split(sp.x[keep], sp.y[keep]))
     for s in ('train', 'val', 'test'):                # datasets are small: keep them on the GPU as uint8
         sp = getattr(b, s)
         setattr(b, s, D.Split(sp.x.to(device), sp.y.to(device)))

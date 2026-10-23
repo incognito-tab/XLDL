@@ -199,7 +199,7 @@ def shd(root, seed, T=100, max_time=1.0, pool=5):
     z = np.load(cache)
     train, val = _split_val(torch.from_numpy(z['x_train']), torch.from_numpy(z['y_train']), 0.1, seed=1234)
     test = Split(torch.from_numpy(z['x_test']), torch.from_numpy(z['y_test']))
-    return Bundle('shd', train, val, test, 20, T_dmp=T, T_mixer=T, in_ch_mixer=1,
+    return Bundle('shd' if T == 100 else f'shd_T{T}', train, val, test, 20, T_dmp=T, T_mixer=T, in_ch_mixer=1,
                   in_dim_dmp=700 // pool, readout_last=0,
                   fmt_mixer=lambda x: _seq_to_image(x.float()), fmt_dmp=lambda x: x.float())
 
@@ -254,6 +254,8 @@ def get(name, root, seed, delay=50, n_distractors=2):
         return cifar10(root, seed)
     if name == 'shd':
         return shd(root, seed)
+    if name == 'shd20':                      # CPU budget: 20 time bins instead of 100
+        return shd(root, seed, T=20)
     if name == 'recall':
         return recall(root, seed, delay, n_distractors)
     raise ValueError(name)

@@ -14,6 +14,8 @@ MIXER_SIZES = {
     'small': dict(dim=78, alpha=3, patch_size=4, depths=[2, 8, 14, 2]),
     # same blocks, fewer/narrower layers so long sequences fit in GPU time
     'lite': dict(dim=48, alpha=3, patch_size=4, depths=[1, 2, 2, 1]),
+    # CPU budget: one block per stage (dim must stay divisible by 3 for PatchCell)
+    'micro': dict(dim=24, alpha=2, patch_size=4, depths=[1, 1, 1, 1]),
 }
 
 
