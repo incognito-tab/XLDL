@@ -1,117 +1,131 @@
-# Efficient Deep Spiking Multi-Layer Perceptrons with Multiplication-Free Inference
+# Nhớ video theo thời gian thực bằng mạng nơ-ron xung
 
-## Overview
-Overall |  Spiking Token Block | Spiking Channel Block | Spiking Patch Encoding
-:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
-<img src="./assets/overview.png" width="300"></img> | <img src="./assets/token.png" width="250"></img> | <img src="./assets/channel.png" width="180"></img> | <img src="./assets/encode.png" width="500"></img> 
+Dự án xây một mạng nơ-ron xung (SNN) xem video thật đang chạy và trả lời câu hỏi về những gì đã qua, không được xem lại khung hình cũ. Mô hình nâng cấp sẽ được so sánh với Mixer-SNN và DMP-SNN.
 
-This project provides the official implementation for our paper "[Efficient Deep Spiking Multi-Layer Perceptrons with Multiplication-Free Inference](https://arxiv.org/abs/2306.12465)". **Mixer-SNN** is a spiking MLP architecture that uses batch normalization to retain MFI compatibility and introduces a spiking patch encoding layer to reinforce local feature extraction capabilities. Our network secures a top-1 accuracy of **66.39%** on the ImageNet-1K dataset, surpassing the directly trained spiking ResNet-34 by **2.67%**. An expanded version of our network compares with the performance of the spiking VGG-16 network with a **71.64%** top-1 accuracy, all while operating with a model capacity **2.1 times smaller**.
+**Trạng thái hiện tại:** dữ liệu và bộ sinh câu hỏi đã xong, chưa huấn luyện mô hình. Vì vậy hiện chỉ có dữ liệu để xem, chưa có kết quả độ chính xác.
 
-## Installation
+Kế hoạch đầy đủ nằm ở [docs/plan.html](docs/plan.html). Tải file về rồi mở bằng trình duyệt.
 
+## 1. Chuẩn bị
+
+Cần có:
+
+- Python 3.11 và Git.
+- `ffprobe`, đi kèm bộ [FFmpeg](https://ffmpeg.org/download.html). Gõ `ffprobe -version` để kiểm tra, vì lệnh này phải chạy được từ terminal.
+- Khoảng 9 GB trống: file nén 7 GB và video đã giải nén 1,9 GB.
+
+Tải code và cài thư viện:
+
+```bash
+git clone https://github.com/incognito-tab/XLDL.git
+cd XLDL
+python -m venv .venv
 ```
-git clone https://github.com/BugMaker-Boyan/Mixer-SNN.git
-cd Mixer-SNN
-conda create -n mixer_snn python=3.9
-conda activate mixer_snn
+
+Kích hoạt môi trường:
+
+```bash
+source .venv/Scripts/activate   # Git Bash trên Windows
+source .venv/bin/activate       # macOS, Linux
+```
+
+```powershell
+.venv\Scripts\Activate.ps1      # PowerShell trên Windows
+```
+
+Sau đó cài thư viện:
+
+```bash
 pip install -r requirements.txt
 ```
 
-Additionally, install cupy package **based on your cuda version**.
+## 2. Tải dữ liệu
 
-```
-# For CUDA 11.2 ~ 11.x
-pip install cupy-cuda11x
-
-# For CUDA 12.x
-pip install cupy-cuda12x
-```
-
-## Training
-
-To train a Mixer-SNN-Small model on ImageNet-1K dataset with 8 GPUs, run:
+Dữ liệu không nằm trong git, nên mỗi người phải tự tải. Chạy từ thư mục gốc của repo:
 
 ```bash
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python -m torch.distributed.launch \
-	--nproc_per_node=8 train.py \
-	--model_size small
-	--T 4 \
-	--cupy \
-	--amp \
-	--batch-size 64 \
-	--model mixer_sparse \
-	--epochs 100 \
-	--output-dir ./logs \
-	--lr 0.1 \
-	--lr-scheduler cosa \
-	--data imagenet \
-	--data-path /data/ILSVRC2012 \
-	--opt sgd \
-	--lr-warmup-epochs 0 \
-	--exp-name Mixer-SNN-Small-ImageNet
+mkdir -p data/ucf101
+curl -L -o data/ucf101/UCF-101.zip https://huggingface.co/datasets/quchenyuan/UCF101-ZIP/resolve/main/UCF-101.zip
+curl -L -o data/ucf101/splits.zip https://www.crcv.ucf.edu/data/UCF101/UCF101TrainTestSplits-RecognitionTask.zip
+python -c "import zipfile; zipfile.ZipFile('data/ucf101/splits.zip').extractall('data/ucf101/splits')"
 ```
 
-To train a Mixer-SNN-Small model on CIFAR10 dataset with 8 GPUs, run:
+Trên PowerShell, thay `curl` bằng `curl.exe`, và dùng `mkdir data/ucf101 -Force` cho dòng đầu.
+
+File `UCF-101.zip` phải có đúng `6957373664` byte. Nếu thiếu, chạy lại lệnh tải với `-C -` để tải tiếp:
 
 ```bash
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python -m torch.distributed.launch \
-	--nproc_per_node=8 train.py \
-	--model_size small
-	--T 4 \
-	--cupy \
-	--amp \
-	--batch-size 64 \
-	--model mixer_sparse \
-	--epochs 100 \
-	--output-dir ./logs \
-	--lr 0.1 \
-	--lr-scheduler cosa \
-	--data cifar10 \
-	--data-path /data/liboyan/ILSVRC2012 \
-	--opt sgd \
-	--lr-warmup-epochs 0 \
-	--exp-name Mixer-SNN-Small-ImageNet
+curl -L -C - -o data/ucf101/UCF-101.zip https://huggingface.co/datasets/quchenyuan/UCF101-ZIP/resolve/main/UCF-101.zip
 ```
 
-You can watch the training process via tensorboard:
+File này là bản sao UCF101 trên Hugging Face, vì máy chủ chính thức rất chậm khi nhóm thử tải. Bước 3 đối chiếu từng clip với danh sách chia tập chính thức. Nếu bước đó báo lỗi hoặc không ra đúng số clip, xóa file zip và tải lại.
+
+## 3. Giải nén và kiểm tra
 
 ```bash
-tensorboadr --logdir=./logs
+python -m vmem.prepare_ucf101 --root data/ucf101
+python -m unittest tests.test_streams
 ```
 
-## Results
+Kết quả đúng:
 
-### ImageNet-1K
+- Lệnh đầu in `Wrote 3255 clips`.
+- Lệnh sau kết thúc bằng `OK`, với 16 kiểm thử.
 
-| Method                                                       | Architecture       | Model Size | T     | Accuracy[%] |
-| ------------------------------------------------------------ | ------------------ | ---------- | ----- | ----------- |
-| [ANN-SNN](https://arxiv.org/abs/1802.02627)                  | ResNet-34          | 22M        | 768   | 71.6        |
-| [ANN-SNN](https://arxiv.org/abs/1802.02627)                  | VGG-16             | 138M       | 2500  | 69.96       |
-| [S-ResNet](https://ieeexplore.ieee.org/document/9597475)     | ResNet-50          | 26M        | 350   | 73.77       |
-| [Hybrid training](https://openreview.net/forum?id=B1xSperKvH) | ResNet-34          | 22M        | 250   | 61.48       |
-| [Hybrid training](https://www.semanticscholar.org/paper/Enabling-Spike-Based-Backpropagation-for-Training-Lee-Sarwar/eaaaed86d1b811fb4690e20ec532d4298c10e324) | VGG-16             | 138M       | 250   | 65.19       |
-| [Tandem Learning](https://ieeexplore.ieee.org/document/9492305) | AlexNet            | 62M        | 10    | 50.22       |
-| [STBP-tdBN](https://ojs.aaai.org/index.php/AAAI/article/view/17320) | ResNet-34          | 22M        | 6     | 63.72       |
-| [TET](https://openreview.net/forum?id=_XNtisL32jv)           | ResNet-34          | 22M        | 6     | 64.79       |
-| [STBP-tdBN](https://ojs.aaai.org/index.php/AAAI/article/view/17320) | ResNet-34-large    | 86M        | 6     | 67.05       |
-| [Diet-SNN](https://ieeexplore.ieee.org/document/9556508/)    | VGG-16             | 138M       | 5     | 69.00       |
-| [SpikeDHS](https://papers.nips.cc/paper_files/paper/2022/hash/9e8c2895db691eaab85af37bddee75aa-Abstract-Conference.html) | SpikeDHS-CLA-large | 58M        | 6     | 67.96       |
-| **Spiking MLP (our model)**                                  | **MLP-SPE-T**      | **25M**    | **4** | **66.39**   |
-| **Spiking MLP (our model)**                                  | **MLP-SPE-T**      | **25M**    | **6** | **69.09**   |
-| **Spiking MLP (our model)**                                  | **MLP-S**          | **34M**    | **4** | **63.25**   |
-| **Spiking MLP (our model)**                                  | **MLP-SPE-S**      | **38M**    | **4** | **68.84**   |
-| **Spiking MLP (our model)**                                  | **MLP-SPE-B**      | **66M**    | **6** | **71.64**   |
+## 4. Xem dữ liệu
 
-For more details,please refer to our paper [Efficient Deep Spiking Multi-Layer Perceptrons with Multiplication-Free Inference](https://arxiv.org/abs/2306.12465).
-
-
-## Citation
-```BibTex
-@article{li2024efficient,
-         title={Efficient Deep Spiking Multi-Layer Perceptrons with Multiplication-Free Inference}, 
-         author={Boyan Li and Luziwei Leng and Shuaijie Shen and Kaixuan Zhang and Jianguo Zhang and Jianxing Liao and Ran Cheng},
-         year={2024},
-         journal={IEEE Transactions on Neural Networks and Learning Systems},
-         doi={10.1109/TNNLS.2024.3394837}
-}
+```bash
+python -m vmem.build_data_viewer --root data/ucf101
 ```
+
+Sau đó mở file `data/ucf101/viewer/index.html` bằng trình duyệt. Trang có:
+
+- **Trình xem luồng:** chọn một luồng video, bấm Phát, rồi chọn câu hỏi để nhảy đến lúc nó được hỏi.
+- **Đáp án và bằng chứng:** bấm "Hiện đáp án và bằng chứng" để xem đáp án cùng các đoạn chứng minh. Bấm vào ảnh bằng chứng để nhảy đến đoạn đó.
+- **Dòng thời gian:** viền xanh là đoạn đang chiếu, ô vàng là bằng chứng, ô mờ là tương lai mà mô hình chưa thấy khi được hỏi.
+- **Thống kê:** 24 hoạt động, độ dài clip, cách chia tập và các loại câu hỏi.
+
+Trang chứa khung hình của UCF101, nên chỉ xem trên máy và đừng đưa lên mạng công khai.
+
+## Dữ liệu gồm những gì
+
+- **Nguồn:** 24 hoạt động trong [UCF101](https://www.crcv.ucf.edu/data/UCF101.php), gồm 3.255 clip video thật.
+- **Luồng video:** ghép các hoạt động dài ngẫu nhiên từ 2 đến 8 giây thành luồng 32 giây, lấy 8 khung hình/giây. Hoạt động có thể lặp lại, nhưng hai đoạn liền nhau luôn khác nhau.
+
+| Tập | Nhóm UCF101 | Số clip |
+|---|---|---:|
+| Train | g11 đến g25 | 1.939 |
+| Validation | g08 đến g10 | 398 |
+| Test | g01 đến g07 | 918 |
+
+Các clip cùng nhóm được cắt từ một video gốc, nên một nhóm chỉ được nằm trong một tập.
+
+| Loại câu hỏi | Mức đoán bừa |
+|---|---:|
+| Cách đây N giây đang có hoạt động gì? | 4,2% |
+| Ở giây thứ T đang xảy ra hoạt động gì? | 4,2% |
+| Trong 4 hoạt động này, hoạt động nào đã xuất hiện? | 25% |
+| Ngay sau lần gần nhất có X là hoạt động gì? | 4,2% |
+
+Mỗi câu hỏi có đáp án kèm bằng chứng. Bằng chứng luôn nằm trong các đoạn đã kết thúc, nên muốn trả lời đúng thì mô hình phải nhớ.
+
+## Cấu trúc repo
+
+| Đường dẫn | Nội dung |
+|---|---|
+| `vmem/classes.py` | 24 hoạt động và tên tiếng Việt |
+| `vmem/prepare_ucf101.py` | Giải nén và ghi thông số từng clip |
+| `vmem/streams.py` | Ghép luồng và sinh câu hỏi |
+| `vmem/build_data_viewer.py`, `vmem/viewer_template.html` | Tạo trang xem dữ liệu |
+| `tests/test_streams.py` | Kiểm thử chống rò rỉ dữ liệu |
+| `models/`, `train.py`, `utils.py`, `samplers.py` | Mã gốc của Mixer-SNN, xem [docs/MIXER_SNN.md](docs/MIXER_SNN.md) |
+| `Dual_memory_pathways/` | Mã gốc của DMP-SNN, xem [README riêng](Dual_memory_pathways/README.md) |
+
+## Lỗi thường gặp
+
+- **`FileNotFoundError` với `ffprobe`:** chưa cài FFmpeg, hoặc thư mục `bin` của FFmpeg chưa nằm trong `PATH`.
+- **`No module named vmem`:** bạn đang đứng sai thư mục. Hãy chạy lệnh từ thư mục gốc của repo.
+- **`No module named cv2`:** thư viện chưa được cài. Hãy kích hoạt môi trường rồi chạy lại `pip install -r requirements.txt`.
+- **`BadZipFile` khi giải nén:** file zip chưa tải xong. Kiểm tra lại dung lượng ở bước 2.
+
+Khi trích dẫn dữ liệu, dùng báo cáo [UCF101: A Dataset of 101 Human Actions Classes From Videos in The Wild](https://arxiv.org/abs/1212.0402).
