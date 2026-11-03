@@ -67,9 +67,9 @@ td:first-child{font-weight:600}
   <div class="tw"><table>
     <tr><td>Nội dung</td><td>13.320 clip video thật về 101 hoạt động như bơi, chơi piano, bắn cung. Kho tải 6,93 GB.</td></tr>
     <tr><td>Phạm vi dùng</td><td>Khoảng 24 hoạt động dễ phân biệt, mở rộng nếu còn thời gian.</td></tr>
-    <tr><td>Luồng video</td><td>Ghép 8 đoạn, mỗi đoạn 4 giây, lấy 8 khung hình/giây. Mỗi luồng dài 32 giây.</td></tr>
+    <tr><td>Luồng video</td><td>Ghép các hoạt động dài ngẫu nhiên từ 2 đến 8 giây thành luồng 32 giây, lấy 8 khung hình/giây. Hoạt động có thể lặp lại, nhưng hai đoạn liền nhau luôn khác nhau.</td></tr>
     <tr><td>Train và test</td><td>Theo split chính thức. Luồng train chỉ ghép từ clip train, luồng test chỉ ghép từ clip test. Tách một phần train làm validation.</td></tr>
-    <tr><td>Câu hỏi</td><td>"Cách đây N giây đang có hoạt động gì?", "X đã xuất hiện chưa?", "X hay Y xảy ra trước?"</td></tr>
+    <tr><td>Câu hỏi</td><td>"Cách đây N giây đang có hoạt động gì?", "Ở giây thứ T đang xảy ra hoạt động gì?", "Trong 4 hoạt động này, hoạt động nào đã xuất hiện?", "Ngay sau lần gần nhất có X là hoạt động gì?". Mỗi câu đều có đáp án kèm bằng chứng là các đoạn thời gian chứng minh đáp án đó.</td></tr>
     <tr><td>Hạn chế</td><td>Luồng được ghép từ nhiều clip nên không phải một video liền mạch.</td></tr>
   </table></div>
 </section>

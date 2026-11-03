@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xem dữ liệu UCF101</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Một giao diện tối như phòng chiếu: video là trung tâm, dữ liệu xếp dưới. */
+:root{
+  --bg:#0f1518; --surface:#182126; --raised:#212c32; --ink:#eaf1f3; --muted:#9db0b8; --line:#2c3a41;
+  --accent:#4fc3d4; --gold:#f2b84b; --gold-ink:#1d1503;
+  --body:"Be Vietnam Pro","Segoe UI",Arial,sans-serif; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.55 var(--body)}
+main{max-width:1180px;margin:0 auto;padding:26px 20px 56px;display:grid;gap:30px}
+main>*{min-width:0}
+h1,h2{margin:0;line-height:1.25;font-weight:700;text-wrap:balance}
+h1{font-size:1.65rem}
+h2{font-size:1.15rem}
+p{margin:0}
+.muted{color:var(--muted)}
+.sm{font-size:.84rem}
+.num{font-variant-numeric:tabular-nums}
+section{display:grid;gap:12px;min-width:0}
+section>*{min-width:0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 14px}
+.tile b{display:block;font-size:1.35rem;font-weight:700;font-variant-numeric:tabular-nums}
+.player{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(290px,1fr);gap:12px}
+@media (max-width:820px){.player{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;align-content:start;min-width:0}
+canvas#screen{width:100%;aspect-ratio:4/3;background:#000;border-radius:4px;display:block}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button,select{font:inherit;color:var(--ink);background:var(--raised);border:1px solid var(--line);border-radius:4px;padding:5px 11px;cursor:pointer}
+button:hover,select:hover{border-color:var(--accent)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=range]{flex:1;min-width:120px;accent-color:var(--accent)}
+.timeline{display:flex;gap:2px}
+.seg{min-width:0;background:var(--raised);border:1px solid var(--line);border-radius:3px;padding:4px 1px;font-size:.66rem;line-height:1.25;text-align:center;cursor:pointer;color:var(--ink);overflow-wrap:anywhere;min-height:48px}
+.seg.now{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.seg.proof{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+.seg.future{opacity:.42}
+.q{display:grid;gap:5px;width:100%;text-align:left;padding:8px 10px;background:var(--raised)}
+.q.on{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+.ans{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:9px 11px;display:grid;gap:4px}
+.ans strong{font-size:1.05rem}
+.proofs{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px}
+.proofs button{padding:0;display:grid;background:var(--raised);overflow:hidden}
+.proofs img{width:100%;display:block}
+.proofs span{font-size:.7rem;padding:3px 5px;line-height:1.3}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.cardv{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.cardv img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.cardv div{padding:7px 9px 9px;display:grid;gap:1px}
+.chart{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px;overflow-x:auto}
+.chart svg{display:block;width:100%;min-width:640px;height:auto}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.82rem;color:var(--muted)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+#tip{position:fixed;pointer-events:none;background:#000;border:1px solid var(--line);color:var(--ink);padding:4px 9px;border-radius:4px;font-size:.8rem;display:none;z-index:5}
+.tw{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:7px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{color:var(--muted);font-weight:600;font-size:.78rem;white-space:nowrap}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<main>
+<header style="display:grid;gap:4px">
+  <h1>Xem dữ liệu UCF101</h1>
+  <p class="muted">24 hoạt động, video thật, ghép thành luồng 32 giây với độ dài ngẫu nhiên, hoạt động có thể lặp lại.</p>
+</header>
+
+<section><div class="tiles" id="tiles"></div></section>
+
+<section>
+  <h2>Xem thử một luồng video</h2>
+  <div class="player">
+    <div class="panel">
+      <canvas id="screen" width="224" height="168" aria-label="Khung hình của luồng video"></canvas>
+      <div class="bar">
+        <button id="play" type="button">Phát</button>
+        <input id="seek" type="range" min="0" max="255" value="0" aria-label="Vị trí trong luồng">
+        <span id="clock" class="num sm">0,0 / 32,0 giây</span>
+      </div>
+      <div class="timeline" id="timeline"></div>
+      <p class="sm muted">Viền xanh là đoạn đang chiếu. Ô vàng là đoạn chứa bằng chứng. Ô mờ là tương lai, mô hình chưa thấy khi được hỏi.</p>
+    </div>
+    <div class="panel">
+      <div class="bar">
+        <label for="stream" class="sm muted">Luồng</label>
+        <select id="stream" style="flex:1;min-width:0;width:100%"></select>
+      </div>
+      <p class="sm muted">Chọn câu hỏi để nhảy đến lúc nó được hỏi.</p>
+      <div id="questions" style="display:grid;grid-template-columns:minmax(0,1fr);gap:6px"></div>
+      <div class="ans" id="answer"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>24 hoạt động</h2>
+  <p class="sm muted">Số clip dùng được để ghép luồng, tức dài từ 2 giây trở lên, theo train, validation và test.</p>
+  <div class="gallery" id="gallery"></div>
+</section>
+
+<section>
+  <h2>Độ dài clip</h2>
+  <div class="legend" id="legend"></div>
+  <div class="chart" id="hist"></div>
+</section>
+
+<section>
+  <h2>Cách chia tập và các loại câu hỏi</h2>
+  <div class="tw"><table id="splits"></table></div>
+  <div class="tw"><table id="kinds"></table></div>
+</section>
+</main>
+<div id="tip" role="status"></div>
+<script id="payload" type="application/json">__PAYLOAD__</script>
+<script>
+const D = JSON.parse(document.getElementById('payload').textContent);
+const $ = id => document.getElementById(id);
+const vi = n => n.toLocaleString('vi-VN');
+const sec = x => x.toFixed(1).replace('.', ',');
+
+$('tiles').innerHTML = D.tiles.map(t => `<div class="tile"><b>${t[0]}</b><span class="sm muted">${t[1]}</span></div>`).join('');
+
+/* Trình xem luồng */
+const FPF = 8, ctx = $('screen').getContext('2d');
+let cur = null, images = [], frame = 0, qi = -1, timer = null, reveal = false;
+
+function draw(){
+  const im = images[frame];
+  if (im && im.complete) ctx.drawImage(im, 0, 0, 224, 168);
+  $('seek').value = frame;
+  $('clock').textContent = `${sec((frame + 1) / FPF)} / 32,0 giây`;
+  const q = qi >= 0 ? cur.questions[qi] : null;
+  const seen = q ? q.segment : -1;
+  [...$('timeline').children].forEach((el, i) => {
+    const span = cur.segments[i];
+    el.classList.toggle('now', span.start <= frame && frame < span.end);
+    el.classList.toggle('proof', !!q && q.proof.includes(i));
+    el.classList.toggle('future', !!q && i > seen);
+  });
+}
+function go(f){ frame = Math.max(0, Math.min(255, f)); draw(); }
+function stop(){ if (timer) clearInterval(timer); timer = null; $('play').textContent = 'Phát'; }
+function start(){
+  if (frame >= 255) frame = 0;
+  $('play').textContent = 'Dừng';
+  timer = setInterval(() => { if (frame >= 255) { stop(); return; } go(frame + 1); }, 125);
+}
+function showAnswer(){
+  const q = qi >= 0 ? cur.questions[qi] : null;
+  if (!q) { $('answer').innerHTML = '<span class="muted sm">Chưa chọn câu hỏi.</span>'; return; }
+  const proofs = q.proof.map(k => {
+    const span = cur.segments[k], mid = Math.floor((span.start + span.end) / 2);
+    return `<button type="button" data-f="${span.start}"><img alt="${span.vi}" src="data:image/jpeg;base64,${cur.frames[mid]}"><span>${span.vi}, ${sec(span.start / FPF)}–${sec(span.end / FPF)} giây</span></button>`;
+  }).join('');
+  const body = reveal
+    ? `<strong>${q.answer}</strong><span class="sm"><b>Bằng chứng:</b> ${q.note}</span><div class="proofs">${proofs}</div>`
+    : `<button id="show" type="button">Hiện đáp án và bằng chứng</button>`;
+  $('answer').innerHTML = `<span class="sm muted">${q.text}</span>${body}`;
+  if (!reveal) { $('show').onclick = () => { reveal = true; showAnswer(); }; return; }
+  $('answer').querySelectorAll('.proofs button').forEach(el => el.onclick = () => { stop(); go(+el.dataset.f); });
+}
+function pick(i){
+  stop(); qi = i; reveal = false;
+  [...$('questions').children].forEach((el, k) => el.classList.toggle('on', k === i));
+  go(cur.questions[i].seen - 1); showAnswer();
+}
+function load(i){
+  stop(); cur = D.streams[i]; qi = -1;
+  images = cur.frames.map(s => { const m = new Image(); m.src = 'data:image/jpeg;base64,' + s; return m; });
+  $('timeline').innerHTML = cur.segments.map((s, k) =>
+    `<button type="button" class="seg" data-k="${k}" style="flex:${s.end - s.start} 1 0" title="${s.vi}: ${sec(s.start / FPF)}–${sec(s.end / FPF)} giây">${s.vi}</button>`).join('');
+  [...$('timeline').children].forEach(el => el.onclick = () => { stop(); go(cur.segments[+el.dataset.k].start); });
+  $('questions').innerHTML = cur.questions.map(q =>
+    `<button type="button" class="q"><span class="sm muted num">Hỏi lúc ${sec(q.seen / FPF)} giây</span><span>${q.text}</span></button>`).join('');
+  [...$('questions').children].forEach((el, k) => el.onclick = () => pick(k));
+  images[0].onload = draw;
+  pick(0);
+  const first = images[frame]; if (first) first.onload = draw;
+}
+$('stream').innerHTML = D.streams.map((s, i) => `<option value="${i}">${s.title}</option>`).join('');
+$('stream').onchange = e => load(+e.target.value);
+$('play').onclick = () => timer ? stop() : start();
+$('seek').oninput = e => { stop(); go(+e.target.value); };
+load(0);
+
+/* Thư viện hoạt động */
+$('gallery').innerHTML = D.classes.map(c =>
+  `<div class="cardv"><img alt="${c.vi}" src="data:image/jpeg;base64,${c.thumb}"><div><b>${c.vi}</b><span class="sm muted">${c.en}</span><span class="sm muted num">${c.train} · ${c.val} · ${c.test}</span></div></div>`).join('');
+
+/* Biểu đồ độ dài clip: một trục, cột mỏng, chú giải kèm nhãn trực tiếp */
+(function(){
+  const USED = '#4fc3d4', SHORT = '#7d8e96';
+  $('legend').innerHTML = `<span><i style="background:${USED}"></i>Dùng để ghép luồng, từ 2 giây</span><span><i style="background:${SHORT}"></i>Chỉ dùng cho bộ mã hóa, dưới 2 giây</span>`;
+  const W = 1000, H = 280, L = 44, R = 10, T = 12, B = 34, bins = D.hist;
+  const top = Math.ceil(Math.max(...bins.map(b => b.n)) / 100) * 100;
+  const y = v => T + (H - T - B) * (1 - v / top), bw = (W - L - R) / bins.length;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Số clip theo độ dài, phần lớn dài từ 4 đến 10 giây">`;
+  for (let v = 0; v <= top; v += top / 4) {
+    s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#2c3a41"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" font-size="12" fill="#9db0b8">${vi(v)}</text>`;
+  }
+  bins.forEach((b, i) => {
+    const x = L + i * bw, h = y(0) - y(b.n), r = Math.min(4, h / 2);
+    const px = x + 1, w = bw - 2, ty = y(b.n), by = y(0);
+    if (b.n) s += `<path d="M${px},${by}V${ty + r}Q${px},${ty} ${px + r},${ty}H${px + w - r}Q${px + w},${ty} ${px + w},${ty + r}V${by}Z" fill="${b.lo >= 2 ? USED : SHORT}"/>`;
+    s += `<rect class="hit" data-t="${b.lo}–${b.lo + 1} giây: ${vi(b.n)} clip" x="${x}" y="${T}" width="${bw}" height="${H - T - B}" fill="transparent"/>`;
+    if (b.lo % 4 === 0) s += `<text x="${x}" y="${H - 14}" text-anchor="middle" font-size="12" fill="#9db0b8">${b.lo}</text>`;
+  });
+  s += `<text x="${W - R}" y="${H - 14}" text-anchor="end" font-size="12" fill="#9db0b8">giây</text></svg>`;
+  $('hist').innerHTML = s;
+  const tip = $('tip');
+  $('hist').addEventListener('mousemove', e => {
+    const t = e.target.dataset && e.target.dataset.t;
+    if (!t) { tip.style.display = 'none'; return; }
+    tip.textContent = t; tip.style.display = 'block';
+    tip.style.left = Math.min(e.clientX + 12, innerWidth - 190) + 'px'; tip.style.top = (e.clientY - 30) + 'px';
+  });
+  $('hist').addEventListener('mouseleave', () => tip.style.display = 'none');
+})();
+
+/* Bảng */
+$('splits').innerHTML = '<tr><th>Tập</th><th>Nhóm UCF101</th><th class="r">Tổng clip</th><th class="r">Clip từ 2 giây</th></tr>' +
+  D.splits.map(s => `<tr><td>${s.name}</td><td>${s.groups}</td><td class="r">${vi(s.total)}</td><td class="r">${vi(s.usable)}</td></tr>`).join('');
+$('kinds').innerHTML = '<tr><th>Loại câu hỏi</th><th>Đáp án</th><th class="r">Mức đoán bừa</th><th class="r">Tỉ lệ trên 12.000 câu mẫu</th></tr>' +
+  D.kinds.map(k => `<tr><td>${k.name}</td><td>${k.answer}</td><td class="r">${k.chance}</td><td class="r">${k.share}</td></tr>`).join('');
+</script>
+</body>
+</html>
