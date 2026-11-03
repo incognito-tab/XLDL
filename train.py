@@ -25,7 +25,6 @@ import models.mixers_sparse_patchcell_origin
 import models.configs
 import utils
 import models.layers
-from digits_data import load_digits_split
 
 from spikingjelly.activation_based import functional, monitor, neuron
 
@@ -51,26 +50,6 @@ CONFIG_MAP = {
     "small": models.configs.get_mixer_sparse_small_config(),
     "big": models.configs.get_mixer_sparse_big_config()
 }
-
-
-class DigitsDataset(torch.utils.data.Dataset):
-    def __init__(self, images, targets, image_size):
-        self.images = torch.tensor(images, dtype=torch.float32).unsqueeze(1) / 16.0
-        self.targets = torch.tensor(targets, dtype=torch.long)
-        self.image_size = image_size
-        self.classes = list(range(10))
-
-    def __len__(self):
-        return len(self.targets)
-
-    def __getitem__(self, index):
-        image = F.interpolate(
-            self.images[index:index + 1],
-            size=(self.image_size, self.image_size),
-            mode='bilinear',
-            align_corners=False,
-        )[0].repeat(3, 1, 1)
-        return image, self.targets[index]
 
 
 class Trainer(object):
@@ -370,22 +349,8 @@ class Trainer(object):
             return self.load_ImageNet(args)
         elif args.data == 'cifar10':
             return self.load_CIFAR10(args)
-        elif args.data == 'digits':
-            return self.load_Digits(args)
         else:
             raise NotImplementedError()
-
-    def load_Digits(self, args):
-        train_images, test_images, train_targets, test_targets = load_digits_split(args.seed)
-        dataset_train = DigitsDataset(train_images, train_targets, args.input_size)
-        dataset_test = DigitsDataset(test_images, test_targets, args.input_size)
-        if args.distributed:
-            train_sampler = torch.utils.data.DistributedSampler(dataset_train, seed=args.seed)
-            test_sampler = torch.utils.data.DistributedSampler(dataset_test, shuffle=False)
-        else:
-            train_sampler = torch.utils.data.RandomSampler(dataset_train)
-            test_sampler = torch.utils.data.SequentialSampler(dataset_test)
-        return dataset_train, dataset_test, train_sampler, test_sampler
 
     def load_model(self, args, num_classes):
         model_dict = self.models[args.model]
@@ -662,7 +627,7 @@ class Trainer(object):
         parser = argparse.ArgumentParser()
 
         parser.add_argument('--exp-name', default='mixer-exp', type=str)
-        parser.add_argument('--data', default='cifar10', choices=['cifar10', 'imagenet', 'digits'])
+        parser.add_argument('--data', default='cifar10', choices=['cifar10', 'imagenet'])
         parser.add_argument('--data-path', default='./data', type=str)
         parser.add_argument('--input-size', default=224, type=int, help='images input size')
         parser.add_argument('--model', default='mixer_sparse', choices=['mixer_sparse'])

@@ -29,19 +29,6 @@ pip install cupy-cuda12x
 
 ## Training
 
-### Quick CPU evaluation on a small real dataset
-
-The [Digits dataset](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.load_digits.html) contains 1,797 labeled handwritten digit images. The `digits` option uses an 80/20 stratified train/test split and resizes the images to 64×64 for this model. It is bundled with scikit-learn, so no dataset download is needed.
-
-```powershell
-python -m pip install -r requirements.txt
-python train.py --device cpu --data digits --input-size 64 --model_size small --T 1 --batch-size 16 --epochs 3 --workers 0 --opt adam --lr 0.001 --mixup 0 --cutmix 0 --lr-warmup-epochs 0 --exp-name digits-cpu
-```
-
-The training output reports `test_acc1` after each epoch and saves the best checkpoint under `logs/`. This accuracy measures handwritten digit classification on the held-out Digits images, not ImageNet performance.
-
-To run the model in `Dual_memory_pathways` on the same Digits split and see the measured comparison, use `python train_dual_digits.py`. Details and CPU results are in [DIGITS_COMPARISON.md](./DIGITS_COMPARISON.md).
-
 To train a Mixer-SNN-Small model on ImageNet-1K dataset with 8 GPUs, run:
 
 ```bash
