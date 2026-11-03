@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kế hoạch nhớ video theo thời gian thực</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Bố cục: một cột gọn, bốn mục đánh số theo đúng yêu cầu. */
+:root{
+  --bg:#f5f7f8; --surface:#ffffff; --ink:#17242b; --muted:#566871; --line:#d7e0e4; --accent:#0b6e7f;
+  --body:"Be Vietnam Pro","Segoe UI",Arial,sans-serif; color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10181c; --surface:#172228; --ink:#e6eef1; --muted:#9db0b8; --line:#2c3b42; --accent:#5cc4d3; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#10181c; --surface:#172228; --ink:#e6eef1; --muted:#9db0b8; --line:#2c3b42; --accent:#5cc4d3; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 var(--body)}
+main{max-width:820px;margin:0 auto;padding:36px 20px 60px;display:grid;gap:34px}
+main>*{min-width:0}
+section{display:grid;gap:12px;min-width:0}
+section>*{min-width:0}
+h1,h2{line-height:1.25;margin:0;text-wrap:balance;font-weight:700}
+h1{font-size:clamp(1.6rem,4vw,2.1rem);letter-spacing:-.01em}
+h2{font-size:1.25rem;border-top:2px solid var(--ink);padding-top:10px}
+p{margin:0;max-width:68ch}
+ul{margin:0;padding-left:1.2em;display:grid;gap:4px;max-width:68ch}
+a{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lede{color:var(--muted)}
+.tw{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:4px}
+table{border-collapse:collapse;width:100%;font-size:.93rem;line-height:1.45}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{font-weight:600;color:var(--muted);font-size:.82rem;white-space:nowrap}
+td:first-child{font-weight:600}
+.mockwrap{overflow-x:auto;border-radius:8px}
+.mock{min-width:680px;background:#0b1216;color:#e9f2f4;border-radius:8px;padding:14px;display:grid;gap:10px;grid-template-columns:1.3fr 1fr;font-size:.82rem;line-height:1.4;color-scheme:dark}
+.mock h4{margin:0;font-size:.74rem;font-weight:600;color:#8fa6af}
+.mp{background:#141f25;border:1px solid #24343c;border-radius:6px;padding:10px;display:grid;gap:8px;align-content:start}
+.vid{height:130px;border-radius:4px;background:linear-gradient(135deg,#27424d,#16252c 60%,#3b2d22);display:grid;place-items:center;color:#c7d6db}
+.tl{display:grid;grid-template-columns:repeat(8,1fr);gap:3px}
+.tl span{padding:4px 2px;border-radius:3px;text-align:center;font-size:.66rem;background:#223640;overflow-wrap:anywhere}
+.tl span.q{background:#f0b64c;color:#1a1305;font-weight:700}
+.ask{background:#0b1216;border:1px solid #2f4750;border-radius:4px;padding:7px 9px;font-weight:600}
+.ans{display:grid;grid-template-columns:96px 1fr 50px 14px;gap:6px;padding:5px 0;border-top:1px solid #24343c;font-variant-numeric:tabular-nums}
+.ans b{font-weight:600}
+.ok{color:#63d69a;font-weight:700}.no{color:#ef7d76;font-weight:700}
+.tag{color:#f0b64c;font-size:.72rem}
+</style>
+</head>
+<body>
+<main>
+
+<header style="display:grid;gap:8px">
+  <h1>Kế hoạch nhớ video theo thời gian thực</h1>
+  <p class="lede">Mạng xung xem video thật đang chạy và trả lời câu hỏi về những gì đã qua, không được xem lại khung hình cũ.</p>
+</header>
+
+<section>
+  <h2>1. Bộ dữ liệu: UCF101</h2>
+  <div class="tw"><table>
+    <tr><td>Nội dung</td><td>13.320 clip video thật về 101 hoạt động như bơi, chơi piano, bắn cung. Kho tải 6,93 GB.</td></tr>
+    <tr><td>Phạm vi dùng</td><td>Khoảng 24 hoạt động dễ phân biệt, mở rộng nếu còn thời gian.</td></tr>
+    <tr><td>Luồng video</td><td>Ghép 8 đoạn, mỗi đoạn 4 giây, lấy 8 khung hình/giây. Mỗi luồng dài 32 giây.</td></tr>
+    <tr><td>Train và test</td><td>Theo split chính thức. Luồng train chỉ ghép từ clip train, luồng test chỉ ghép từ clip test. Tách một phần train làm validation.</td></tr>
+    <tr><td>Câu hỏi</td><td>"Cách đây N giây đang có hoạt động gì?", "X đã xuất hiện chưa?", "X hay Y xảy ra trước?"</td></tr>
+    <tr><td>Hạn chế</td><td>Luồng được ghép từ nhiều clip nên không phải một video liền mạch.</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>2. Cách huấn luyện 3 mô hình</h2>
+  <p><strong>Bước 1:</strong> huấn luyện một bộ mã hóa khung hình bằng xung (khối của Mixer-SNN) để nhận diện hoạt động trên từng clip, rồi lưu sẵn đặc trưng.</p>
+  <p><strong>Bước 2:</strong> dùng chung đặc trưng đó để huấn luyện phần nhớ của 3 mô hình trên luồng video và câu hỏi.</p>
+  <div class="tw"><table>
+    <tr><th>Mô hình</th><th>Phần nhớ</th><th>Cần chỉnh</th></tr>
+    <tr><td>Mixer-SNN</td><td>Điện thế màng của nơ-ron LIF, với <code>tau</code> tốt nhất tìm được.</td><td><code>tau</code>: 2, 4, 8, 16, 32, 64, 128, 256, thêm 2 cấu hình tinh chỉnh quanh giá trị tốt nhất.</td></tr>
+    <tr><td>DMP-SNN</td><td>Bộ nhớ chậm gốc, với dung lượng phù hợp nhất tìm được.</td><td>Dung lượng <code>d</code>: 5, 10, 20, 40, 80, kết hợp cửa sổ <code>theta</code>: 64, 256 bước.</td></tr>
+    <tr><td>Mô hình nâng cấp</td><td>Nạp bộ nhớ bằng vector thay vì một số, dùng nhiều cửa sổ thời gian, để câu hỏi chọn phần bộ nhớ cần đọc.</td><td>Thêm từng thay đổi, chỉ giữ thay đổi có ích, tổng cộng 10 cấu hình.</td></tr>
+  </table></div>
+  <p><strong>Bước 3:</strong> mỗi mô hình được tối ưu với cùng điều kiện, để mỗi mô hình đều ở trạng thái tốt nhất khi so sánh:</p>
+  <ul>
+    <li>Cùng bộ mã hóa, cùng dữ liệu, cùng số epoch, và đều có 10 cấu hình để dò.</li>
+    <li>Chọn cấu hình chỉ bằng validation, chạy cấu hình tốt nhất với 3 seed, rồi đánh giá tập test một lần.</li>
+    <li>Báo cáo thêm Mixer với <code>tau = 2</code> và DMP với <code>d = 10</code> để thấy mức cải thiện so với cấu hình ban đầu.</li>
+    <li>Gỡ lỗi trên Colab, chạy dài trên Modal.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Giao diện demo</h2>
+  <p>Ba mô hình cùng xem một video thật. Người xem chọn câu hỏi giữa chừng và so sánh ngay câu trả lời của cả ba.</p>
+  <div class="mockwrap"><div class="mock" role="img" aria-label="Bản phác giao diện: video và dòng thời gian bên trái, câu hỏi và câu trả lời của ba mô hình bên phải">
+    <div class="mp">
+      <div class="vid">Video thật đang phát · 00:28 / 00:32</div>
+      <h4>Dòng thời gian: đoạn được hỏi tô vàng</h4>
+      <div class="tl"><span>Piano</span><span>Bơi</span><span class="q">Bắn cung</span><span>Bóng rổ</span><span>Lướt ván</span><span>Đấu kiếm</span><span>Đánh trống</span><span>Đạp xe</span></div>
+    </div>
+    <div class="mp">
+      <div class="ask">Cách đây 20 giây đang có hoạt động gì?</div>
+      <div>
+        <div class="ans"><b>Mô hình nâng cấp</b><span>Bắn cung</span><span>41 ms</span><span class="ok">✓</span></div>
+        <div class="ans"><b>DMP-SNN</b><span>Bắn cung</span><span>38 ms</span><span class="ok">✓</span></div>
+        <div class="ans"><b>Mixer-SNN</b><span>Đạp xe</span><span>35 ms</span><span class="no">✗</span></div>
+      </div>
+      <p class="tag">Số và đáp án chỉ để minh họa, không phải kết quả đo.</p>
+    </div>
+  </div></div>
+  <ul>
+    <li>Có thêm biểu đồ xung và trạng thái bộ nhớ chạy theo thời gian thực.</li>
+    <li>Dùng FastAPI và WebSocket cho backend, giao diện web riêng cho frontend.</li>
+    <li>Có chế độ phát lại kết quả đã lưu để phòng khi mất mạng, và giao diện ghi rõ là phát lại.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>4. Tiêu chí so sánh</h2>
+  <div class="tw"><table>
+    <tr><th>Tiêu chí</th><th>Cách đo</th><th>Mô hình nâng cấp cần đạt (đề xuất)</th></tr>
+    <tr><td>Độ chính xác</td><td>Tập test, chia theo khoảng cách nhớ và loại câu hỏi, 3 seed.</td><td>Hơn cả hai mô hình, chênh lệch lớn hơn độ lệch giữa các seed.</td></tr>
+    <tr><td>Tốc độ</td><td>Thời gian xử lý mỗi khung hình và thời gian trả lời, trên cùng một máy.</td><td>Dưới 125 ms mỗi khung hình, trả lời dưới 100 ms.</td></tr>
+    <tr><td>Độ bền</td><td>Mức tụt độ chính xác khi hỏi xa hơn và khi mất 20% khung hình.</td><td>Tụt ít hơn cả hai mô hình.</td></tr>
+    <tr><td>Chi phí</td><td>Số tham số, tỉ lệ phát xung, dung lượng trạng thái nhớ.</td><td>Báo cáo để so sánh, không đặt mức cứng.</td></tr>
+  </table></div>
+</section>
+
+
+<section>
+  <h2>5. Các việc cần làm</h2>
+  <p>A phụ trách dữ liệu, đo lường và giao diện. B phụ trách mô hình và huấn luyện. Lịch này giả định hạn nộp là 03/12/2026.</p>
+  <div class="tw"><table>
+    <tr><th>Hạn</th><th>Người</th><th>Việc</th></tr>
+    <tr><td colspan="3" style="background:var(--bg)">Tuần 1: dữ liệu và bộ mã hóa</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">04/11</td><td style="white-space:nowrap">Cả hai</td><td>Chốt ai làm A, ai làm B. Xác nhận ngày nộp và mẫu báo cáo. Commit phần dọn repo.</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">05/11</td><td style="white-space:nowrap">A</td><td>Tải UCF101, đọc điều khoản sử dụng, chọn 24 hoạt động.</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">05/11</td><td style="white-space:nowrap">B</td><td>Tạo tài khoản Modal, chạy thử GPU.</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">07/11</td><td style="white-space:nowrap">A</td><td>Viết bộ ghép luồng video và sinh câu hỏi, kiểm tra luồng test không lẫn clip train.</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">09/11</td><td style="white-space:nowrap">B</td><td>Huấn luyện bộ mã hóa xung, đo độ chính xác theo clip và thời gian mỗi khung hình.</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">09/11</td><td style="white-space:nowrap">A</td><td>Viết công cụ đo chung cho 4 tiêu chí so sánh.</td></tr>
+    <tr><td colspan="3" style="background:var(--bg)">Tuần 2: tối ưu Mixer và DMP</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">11/11</td><td style="white-space:nowrap">B</td><td>Trích sẵn đặc trưng của mọi clip.</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">13/11</td><td style="white-space:nowrap">B</td><td>Dò 10 cấu hình <code>tau</code> cho Mixer.</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">14/11</td><td style="white-space:nowrap">B</td><td>Dò 10 cấu hình <code>d</code> và <code>theta</code> cho DMP.</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">16/11</td><td style="white-space:nowrap">A</td><td>Chạy lại cấu hình tốt nhất với 3 seed trên validation, vẽ độ chính xác theo khoảng cách nhớ.</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">16/11</td><td style="white-space:nowrap">A</td><td>Dựng giao diện demo với dữ liệu giả.</td></tr>
+    <tr><td colspan="3" style="background:var(--bg)">Tuần 3: mô hình nâng cấp</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">19/11</td><td style="white-space:nowrap">B</td><td>Thử nạp bộ nhớ bằng vector và nhiều cửa sổ thời gian.</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">21/11</td><td style="white-space:nowrap">B</td><td>Thử để câu hỏi chọn phần bộ nhớ cần đọc, chỉ giữ thay đổi có ích.</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">21/11</td><td style="white-space:nowrap">A</td><td>Viết bản DMP chạy từng bước, kiểm tra khớp bản gốc, nối vào giao diện.</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">23/11</td><td style="white-space:nowrap">Cả hai</td><td>Chốt mô hình bằng validation, đánh giá tập test một lần với 3 seed. Không đổi mô hình sau ngày này.</td></tr>
+    <tr><td colspan="3" style="background:var(--bg)">Tuần 4: hoàn thiện và nộp</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">28/11</td><td style="white-space:nowrap">A</td><td>Hoàn thiện giao diện, thêm đủ 3 mô hình, làm chế độ phát lại, chọn video trình diễn.</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">28/11</td><td style="white-space:nowrap">B</td><td>Tối ưu tốc độ suy luận, viết phần phương pháp và kết quả.</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">30/11</td><td style="white-space:nowrap">Cả hai</td><td>Chạy lại kết quả từ máy sạch, quay video dự phòng, hoàn thành báo cáo.</td></tr>
+    <tr><td style="white-space:nowrap;font-variant-numeric:tabular-nums">03/12</td><td style="white-space:nowrap">Cả hai</td><td>Tập dượt, sửa lỗi, nộp bài.</td></tr>
+  </table></div>
+</section>
+
+</main>
+</body>
+</html>
