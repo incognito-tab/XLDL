@@ -10,3 +10,5 @@ numpy
 scikit-learn
 scipy
 opencv-python
+fastapi
+uvicorn

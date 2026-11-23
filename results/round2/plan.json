@@ -1,0 +1,95 @@
+{
+ "best": {
+  "mixer": {
+   "tau": 24.0
+  },
+  "dmp": {
+   "memory_size": 40,
+   "theta": 256
+  },
+  "plus": {
+   "channels": 16,
+   "memory_size": 10,
+   "thetas": [
+    16,
+    64,
+    256
+   ],
+   "query_read": true
+  }
+ },
+ "plus_params": 804664,
+ "params": {
+  "[\"mixer\", {\"tau\": 24.0}]": 327448,
+  "[\"mixer\", {\"tau\": 2.0}]": 327448,
+  "[\"mixer\", {\"tau\": 24.0, \"query_read\": true, \"hidden\": 448}]": 842392,
+  "[\"dmp\", {\"memory_size\": 40, \"theta\": 256}]": 348298,
+  "[\"dmp\", {\"memory_size\": 40, \"theta\": 256, \"query_read\": true, \"hidden\": 448}]": 773962,
+  "[\"plus\", {\"channels\": 16, \"memory_size\": 10, \"thetas\": [16, 64, 256], \"query_read\": true}]": 804664,
+  "[\"plus\", {\"channels\": 16, \"memory_size\": 10, \"thetas\": [16, 64, 256], \"query_read\": false}]": 586808
+ },
+ "chosen": [
+  [
+   "mixer",
+   {
+    "tau": 24.0
+   }
+  ],
+  [
+   "mixer",
+   {
+    "tau": 2.0
+   }
+  ],
+  [
+   "mixer",
+   {
+    "tau": 24.0,
+    "query_read": true,
+    "hidden": 448
+   }
+  ],
+  [
+   "dmp",
+   {
+    "memory_size": 40,
+    "theta": 256
+   }
+  ],
+  [
+   "dmp",
+   {
+    "memory_size": 40,
+    "theta": 256,
+    "query_read": true,
+    "hidden": 448
+   }
+  ],
+  [
+   "plus",
+   {
+    "channels": 16,
+    "memory_size": 10,
+    "thetas": [
+     16,
+     64,
+     256
+    ],
+    "query_read": true
+   }
+  ],
+  [
+   "plus",
+   {
+    "channels": 16,
+    "memory_size": 10,
+    "thetas": [
+     16,
+     64,
+     256
+    ],
+    "query_read": false
+   }
+  ]
+ ]
+}

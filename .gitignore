@@ -5,3 +5,4 @@ data/*
 *.log
 .venv/
 __pycache__/
+/*.npy

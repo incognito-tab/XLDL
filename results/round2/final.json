@@ -1,0 +1,149 @@
+[
+ {
+  "name": "mixer_tau24_s0_final",
+  "val_mean_acc": 0.2299,
+  "val_above_chance": 0.1545,
+  "firing_rate": 0.0276,
+  "test_mean_acc": 0.2179
+ },
+ {
+  "name": "mixer_tau24_s1_final",
+  "val_mean_acc": 0.2231,
+  "val_above_chance": 0.1472,
+  "firing_rate": 0.0271,
+  "test_mean_acc": 0.2164
+ },
+ {
+  "name": "mixer_tau24_s2_final",
+  "val_mean_acc": 0.2207,
+  "val_above_chance": 0.144,
+  "firing_rate": 0.0281,
+  "test_mean_acc": 0.2161
+ },
+ {
+  "name": "mixer_tau2_s0_final",
+  "val_mean_acc": 0.1171,
+  "val_above_chance": 0.0275,
+  "firing_rate": 0.0814,
+  "test_mean_acc": 0.1161
+ },
+ {
+  "name": "mixer_tau2_s1_final",
+  "val_mean_acc": 0.1208,
+  "val_above_chance": 0.0322,
+  "firing_rate": 0.0901,
+  "test_mean_acc": 0.1138
+ },
+ {
+  "name": "mixer_tau2_s2_final",
+  "val_mean_acc": 0.119,
+  "val_above_chance": 0.0301,
+  "firing_rate": 0.0836,
+  "test_mean_acc": 0.1173
+ },
+ {
+  "name": "mixer_tau24_query_readTrue_hidden448_s0_final",
+  "val_mean_acc": 0.3064,
+  "val_above_chance": 0.2433,
+  "firing_rate": 0.0002,
+  "test_mean_acc": 0.2893
+ },
+ {
+  "name": "mixer_tau24_query_readTrue_hidden448_s1_final",
+  "val_mean_acc": 0.3043,
+  "val_above_chance": 0.2408,
+  "firing_rate": 0.0002,
+  "test_mean_acc": 0.2868
+ },
+ {
+  "name": "mixer_tau24_query_readTrue_hidden448_s2_final",
+  "val_mean_acc": 0.3064,
+  "val_above_chance": 0.2422,
+  "firing_rate": 0.0002,
+  "test_mean_acc": 0.2895
+ },
+ {
+  "name": "dmp_memory_size40_theta256_s0_final",
+  "val_mean_acc": 0.2719,
+  "val_above_chance": 0.2037,
+  "firing_rate": 0.1894,
+  "test_mean_acc": 0.2391
+ },
+ {
+  "name": "dmp_memory_size40_theta256_s1_final",
+  "val_mean_acc": 0.2573,
+  "val_above_chance": 0.1863,
+  "firing_rate": 0.2143,
+  "test_mean_acc": 0.2396
+ },
+ {
+  "name": "dmp_memory_size40_theta256_s2_final",
+  "val_mean_acc": 0.2592,
+  "val_above_chance": 0.19,
+  "firing_rate": 0.201,
+  "test_mean_acc": 0.2389
+ },
+ {
+  "name": "dmp_memory_size40_theta256_query_readTrue_hidden448_s0_final",
+  "val_mean_acc": 0.2907,
+  "val_above_chance": 0.2212,
+  "firing_rate": 0.1109,
+  "test_mean_acc": 0.2359
+ },
+ {
+  "name": "dmp_memory_size40_theta256_query_readTrue_hidden448_s1_final",
+  "val_mean_acc": 0.1667,
+  "val_above_chance": 0.0836,
+  "firing_rate": 0.1632,
+  "test_mean_acc": 0.1826
+ },
+ {
+  "name": "dmp_memory_size40_theta256_query_readTrue_hidden448_s2_final",
+  "val_mean_acc": 0.1935,
+  "val_above_chance": 0.115,
+  "firing_rate": 0.0712,
+  "test_mean_acc": 0.1789
+ },
+ {
+  "name": "plus_channels16_memory_size10_thetas16-64-256_query_readTrue_s0_final",
+  "val_mean_acc": 0.4871,
+  "val_above_chance": 0.4402,
+  "firing_rate": 0.1211,
+  "test_mean_acc": 0.4368
+ },
+ {
+  "name": "plus_channels16_memory_size10_thetas16-64-256_query_readTrue_s1_final",
+  "val_mean_acc": 0.4771,
+  "val_above_chance": 0.429,
+  "firing_rate": 0.1131,
+  "test_mean_acc": 0.4408
+ },
+ {
+  "name": "plus_channels16_memory_size10_thetas16-64-256_query_readTrue_s2_final",
+  "val_mean_acc": 0.4637,
+  "val_above_chance": 0.4138,
+  "firing_rate": 0.1382,
+  "test_mean_acc": 0.4366
+ },
+ {
+  "name": "plus_channels16_memory_size10_thetas16-64-256_query_readFalse_s0_final",
+  "val_mean_acc": 0.3433,
+  "val_above_chance": 0.2857,
+  "firing_rate": 0.2492,
+  "test_mean_acc": 0.3244
+ },
+ {
+  "name": "plus_channels16_memory_size10_thetas16-64-256_query_readFalse_s1_final",
+  "val_mean_acc": 0.3503,
+  "val_above_chance": 0.2936,
+  "firing_rate": 0.2358,
+  "test_mean_acc": 0.3221
+ },
+ {
+  "name": "plus_channels16_memory_size10_thetas16-64-256_query_readFalse_s2_final",
+  "val_mean_acc": 0.3567,
+  "val_above_chance": 0.3001,
+  "firing_rate": 0.2768,
+  "test_mean_acc": 0.3311
+ }
+]

@@ -1,0 +1,80 @@
+[
+ {
+  "name": "mixer_tau8_s0",
+  "val_mean_acc": 0.1748,
+  "val_above_chance": 0.0912,
+  "firing_rate": 0.0447
+ },
+ {
+  "name": "mixer_tau16_s0",
+  "val_mean_acc": 0.2144,
+  "val_above_chance": 0.1345,
+  "firing_rate": 0.0358
+ },
+ {
+  "name": "mixer_tau24_s0",
+  "val_mean_acc": 0.2299,
+  "val_above_chance": 0.1545,
+  "firing_rate": 0.0276
+ },
+ {
+  "name": "mixer_tau32_s0",
+  "val_mean_acc": 0.2208,
+  "val_above_chance": 0.1437,
+  "firing_rate": 0.0245
+ },
+ {
+  "name": "mixer_tau64_s0",
+  "val_mean_acc": 0.1831,
+  "val_above_chance": 0.1028,
+  "firing_rate": 0.015
+ },
+ {
+  "name": "dmp_memory_size10_theta256_s0",
+  "val_mean_acc": 0.2441,
+  "val_above_chance": 0.1726,
+  "firing_rate": 0.1848
+ },
+ {
+  "name": "dmp_memory_size40_theta256_s0",
+  "val_mean_acc": 0.2719,
+  "val_above_chance": 0.2037,
+  "firing_rate": 0.1894
+ },
+ {
+  "name": "dmp_memory_size80_theta256_s0",
+  "val_mean_acc": 0.2274,
+  "val_above_chance": 0.1534,
+  "firing_rate": 0.1751
+ },
+ {
+  "name": "dmp_memory_size10_theta64_s0",
+  "val_mean_acc": 0.2144,
+  "val_above_chance": 0.1379,
+  "firing_rate": 0.1306
+ },
+ {
+  "name": "plus_channels16_memory_size10_thetas16-64-256_query_readTrue_s0",
+  "val_mean_acc": 0.4871,
+  "val_above_chance": 0.4402,
+  "firing_rate": 0.1211
+ },
+ {
+  "name": "plus_channels32_memory_size10_thetas16-64-256_query_readTrue_s0",
+  "val_mean_acc": 0.4453,
+  "val_above_chance": 0.3945,
+  "firing_rate": 0.1458
+ },
+ {
+  "name": "plus_channels16_memory_size20_thetas16-64-256_query_readTrue_s0",
+  "val_mean_acc": 0.4162,
+  "val_above_chance": 0.3632,
+  "firing_rate": 0.148
+ },
+ {
+  "name": "plus_channels32_memory_size20_thetas16-64-256_query_readTrue_s0",
+  "val_mean_acc": 0.401,
+  "val_above_chance": 0.3493,
+  "firing_rate": 0.1936
+ }
+]

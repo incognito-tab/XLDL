@@ -1,0 +1,182 @@
+[
+ {
+  "name": "mixer_tau2_s0",
+  "val_mean_acc": 0.1178,
+  "val_above_chance": 0.0281,
+  "firing_rate": 0.0854
+ },
+ {
+  "name": "mixer_tau4_s0",
+  "val_mean_acc": 0.1468,
+  "val_above_chance": 0.0596,
+  "firing_rate": 0.0574
+ },
+ {
+  "name": "mixer_tau8_s0",
+  "val_mean_acc": 0.1642,
+  "val_above_chance": 0.08,
+  "firing_rate": 0.0442
+ },
+ {
+  "name": "mixer_tau16_s0",
+  "val_mean_acc": 0.1953,
+  "val_above_chance": 0.113,
+  "firing_rate": 0.036
+ },
+ {
+  "name": "mixer_tau32_s0",
+  "val_mean_acc": 0.2083,
+  "val_above_chance": 0.1304,
+  "firing_rate": 0.0256
+ },
+ {
+  "name": "mixer_tau64_s0",
+  "val_mean_acc": 0.1629,
+  "val_above_chance": 0.0815,
+  "firing_rate": 0.0172
+ },
+ {
+  "name": "mixer_tau128_s0",
+  "val_mean_acc": 0.1224,
+  "val_above_chance": 0.0332,
+  "firing_rate": 0.0097
+ },
+ {
+  "name": "mixer_tau256_s0",
+  "val_mean_acc": 0.1327,
+  "val_above_chance": 0.0459,
+  "firing_rate": 0.004
+ },
+ {
+  "name": "dmp_memory_size5_theta64_s0",
+  "val_mean_acc": 0.2332,
+  "val_above_chance": 0.1591,
+  "firing_rate": 0.1626
+ },
+ {
+  "name": "dmp_memory_size5_theta256_s0",
+  "val_mean_acc": 0.2069,
+  "val_above_chance": 0.1287,
+  "firing_rate": 0.2133
+ },
+ {
+  "name": "dmp_memory_size10_theta64_s0",
+  "val_mean_acc": 0.232,
+  "val_above_chance": 0.1578,
+  "firing_rate": 0.1492
+ },
+ {
+  "name": "dmp_memory_size10_theta256_s0",
+  "val_mean_acc": 0.2511,
+  "val_above_chance": 0.1814,
+  "firing_rate": 0.2135
+ },
+ {
+  "name": "dmp_memory_size20_theta64_s0",
+  "val_mean_acc": 0.2311,
+  "val_above_chance": 0.1567,
+  "firing_rate": 0.179
+ },
+ {
+  "name": "dmp_memory_size20_theta256_s0",
+  "val_mean_acc": 0.2343,
+  "val_above_chance": 0.1631,
+  "firing_rate": 0.2219
+ },
+ {
+  "name": "dmp_memory_size40_theta64_s0",
+  "val_mean_acc": 0.2312,
+  "val_above_chance": 0.1575,
+  "firing_rate": 0.1722
+ },
+ {
+  "name": "dmp_memory_size40_theta256_s0",
+  "val_mean_acc": 0.2251,
+  "val_above_chance": 0.1517,
+  "firing_rate": 0.2121
+ },
+ {
+  "name": "dmp_memory_size80_theta64_s0",
+  "val_mean_acc": 0.2306,
+  "val_above_chance": 0.1548,
+  "firing_rate": 0.1744
+ },
+ {
+  "name": "dmp_memory_size80_theta256_s0",
+  "val_mean_acc": 0.2489,
+  "val_above_chance": 0.1795,
+  "firing_rate": 0.2096
+ },
+ {
+  "name": "plus_channels16_memory_size10_thetas256_query_readFalse_s0",
+  "val_mean_acc": 0.3232,
+  "val_above_chance": 0.2619,
+  "firing_rate": 0.2885
+ },
+ {
+  "name": "plus_channels32_memory_size10_thetas256_query_readFalse_s0",
+  "val_mean_acc": 0.3331,
+  "val_above_chance": 0.274,
+  "firing_rate": 0.2768
+ },
+ {
+  "name": "plus_channels16_memory_size10_thetas16-64-256_query_readFalse_s0",
+  "val_mean_acc": 0.3288,
+  "val_above_chance": 0.2686,
+  "firing_rate": 0.2623
+ },
+ {
+  "name": "plus_channels16_memory_size20_thetas16-64-256_query_readFalse_s0",
+  "val_mean_acc": 0.29,
+  "val_above_chance": 0.2266,
+  "firing_rate": 0.2362
+ },
+ {
+  "name": "plus_channels32_memory_size10_thetas16-64-256_query_readFalse_s0",
+  "val_mean_acc": 0.3415,
+  "val_above_chance": 0.2838,
+  "firing_rate": 0.267
+ },
+ {
+  "name": "plus_channels16_memory_size10_thetas16-64-256_query_readTrue_s0",
+  "val_mean_acc": 0.464,
+  "val_above_chance": 0.4148,
+  "firing_rate": 0.0483
+ },
+ {
+  "name": "plus_channels32_memory_size10_thetas16-64-256_query_readTrue_s0",
+  "val_mean_acc": 0.4866,
+  "val_above_chance": 0.4403,
+  "firing_rate": 0.0167
+ },
+ {
+  "name": "plus_channels16_memory_size20_thetas16-64-256_query_readTrue_s0",
+  "val_mean_acc": 0.4646,
+  "val_above_chance": 0.4143,
+  "firing_rate": 0.0505
+ },
+ {
+  "name": "plus_channels16_memory_size10_thetas8-32-128-256_query_readTrue_s0",
+  "val_mean_acc": 0.4618,
+  "val_above_chance": 0.4124,
+  "firing_rate": 0.0368
+ },
+ {
+  "name": "plus_channels32_memory_size20_thetas16-64-256_query_readTrue_s0",
+  "val_mean_acc": 0.4791,
+  "val_above_chance": 0.4332,
+  "firing_rate": 0.0347
+ },
+ {
+  "name": "mixer_tau24_s0",
+  "val_mean_acc": 0.2155,
+  "val_above_chance": 0.1377,
+  "firing_rate": 0.0315
+ },
+ {
+  "name": "mixer_tau48_s0",
+  "val_mean_acc": 0.1895,
+  "val_above_chance": 0.109,
+  "firing_rate": 0.0196
+ }
+]

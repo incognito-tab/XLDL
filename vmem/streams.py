@@ -44,6 +44,25 @@ DELAY_CHOICES = tuple(range(1, STREAM_SECONDS - 1))
 MOMENT_CHOICES = tuple(range(0, STREAM_SECONDS - 2))
 QUESTION_VECTOR_SIZE = (len(QUESTION_TYPES) + len(DELAY_CHOICES) + len(MOMENT_CHOICES)
                         + 2 * NUM_CLASSES)
+CLOCK_SIZE = STREAM_SECONDS  # optional: which second of the stream it is when the question is asked
+RELATIVE_SIZE = STREAM_SECONDS  # optional: how many seconds back the asked moment is, rounded
+
+
+def question_size(clock=False, relative=False):
+    return QUESTION_VECTOR_SIZE + (CLOCK_SIZE if clock else 0) + (RELATIVE_SIZE if relative else 0)
+
+
+def delay_frames(question):
+    """Frames from the newest visible frame back to the moment asked about, or -1.
+
+    "At second T" becomes "this long ago" using only the current time, which a
+    live system always knows when the question is asked.
+    """
+    if question.kind == WHAT_WAS_HAPPENING:
+        return question.delay_seconds * FPS
+    if question.kind == WHAT_AT_TIME:
+        return question.seen_frames - 1 - question.moment_seconds * FPS
+    return -1
 _MAX_TRIES = 2000
 _TIMES_PER_CHOICE = 60
 
@@ -276,9 +295,15 @@ class StreamDataset:
         return Sample(self.split, index, tuple(segments), tuple(questions))
 
 
-def encode_question(question):
-    """Binary vector: type, delay, second, X, options. Fed to the network as spikes."""
-    vector = np.zeros(QUESTION_VECTOR_SIZE, dtype=np.uint8)
+def encode_question(question, clock=False, relative=False):
+    """Binary vector: type, delay, second, X, options. Fed to the network as spikes.
+
+    With `clock`, one more spike marks the current second. A live system always
+    knows the time when it is asked, so this reveals nothing about the future.
+    With `relative`, one more spike marks how many seconds back the asked moment
+    is (rounded), for both "N seconds ago" and "at second T".
+    """
+    vector = np.zeros(question_size(clock, relative), dtype=np.uint8)
     vector[question.kind] = 1
     offset = len(QUESTION_TYPES)
     if question.delay_seconds:
@@ -292,6 +317,11 @@ def encode_question(question):
     offset += NUM_CLASSES
     for option in question.options:
         vector[offset + option] = 1
+    if clock:
+        vector[QUESTION_VECTOR_SIZE + (question.seen_frames - 1) // FPS] = 1
+    if relative and delay_frames(question) >= 0:
+        seconds = min(max(int(round(delay_frames(question) / FPS)), 1), RELATIVE_SIZE)
+        vector[question_size(clock) + seconds - 1] = 1
     return vector
 
 

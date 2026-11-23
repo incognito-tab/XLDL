@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bộ nhớ video SNN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1218; --panel: #171b24; --panel2: #1e2330; --line: #2a3040;
+  --text: #e8ebf2; --muted: #9098ab; --accent: #6aa8ff; --good: #3ccf8e; --bad: #ff6b6b;
+  --plus: #6aa8ff; --mixer: #f0a85a; --dmp: #b48cff; --evidence: #ffd166;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 "Be Vietnam Pro", system-ui, sans-serif; }
+header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 18px 28px; border-bottom: 1px solid var(--line); }
+header h1 { font-size: 20px; margin: 0; font-weight: 700; }
+header .sub { color: var(--muted); font-size: 13px; }
+.chips { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { padding: 5px 11px; border-radius: 999px; background: var(--panel2); font-size: 13px; border: 1px solid var(--line); }
+.chip b { font-weight: 600; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+main { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; padding: 20px 28px; max-width: 1500px; margin: 0 auto; }
+@media (max-width: 1000px) { main { grid-template-columns: 1fr; padding: 16px; } header { padding: 14px 16px; } }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+.card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 12px; font-weight: 600; }
+.stage { position: relative; border-radius: 10px; overflow: hidden; background: #000; aspect-ratio: 4 / 3; }
+canvas { width: 100%; height: 100%; display: block; }
+.clock { position: absolute; left: 12px; top: 10px; background: rgba(0,0,0,.6); padding: 3px 10px; border-radius: 6px; font-variant-numeric: tabular-nums; font-size: 14px; }
+.loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); }
+.controls { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+button { font: inherit; border: 1px solid var(--line); background: var(--panel2); color: var(--text); border-radius: 9px; padding: 7px 14px; cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #0b1020; font-weight: 600; }
+button.on { border-color: var(--accent); color: var(--accent); }
+select { font: inherit; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 9px; padding: 7px 10px; }
+input[type=range] { accent-color: var(--accent); }
+#seek { flex: 1; min-width: 120px; }
+.timeline { position: relative; height: 44px; margin-top: 14px; border-radius: 8px; background: var(--panel2); overflow: hidden; }
+.seg { position: absolute; top: 0; bottom: 0; border-right: 2px solid var(--bg); font-size: 11px; padding: 4px 6px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #0b1020; font-weight: 600; }
+.seg.future { background: repeating-linear-gradient(45deg, #232838, #232838 6px, #1d2130 6px, #1d2130 12px) !important; color: transparent; }
+.seg.evidence { outline: 3px solid var(--evidence); outline-offset: -3px; }
+.playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff; box-shadow: 0 0 6px #fff; }
+.asked { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--evidence); }
+.ticks { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; margin-top: 4px; }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.presets button { font-size: 13px; text-align: left; }
+.presets small { color: var(--muted); margin-right: 6px; }
+.tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.tabs button { text-align: left; font-size: 14px; }
+.param { margin: 14px 0; display: flex; align-items: center; gap: 12px; }
+.param label { color: var(--muted); font-size: 14px; min-width: 120px; }
+.param output { font-weight: 600; min-width: 64px; }
+.qtext { font-size: 17px; font-weight: 600; margin: 4px 0 10px; }
+.truth { background: rgba(60, 207, 142, .1); border: 1px solid rgba(60, 207, 142, .35); border-radius: 10px; padding: 10px 12px; }
+.truth .muted { color: var(--muted); font-size: 13px; }
+.models { display: grid; gap: 10px; margin-top: 12px; }
+.model { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--panel2); border-left-width: 4px; }
+.model .row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.model .name { font-weight: 600; }
+.model .meta { margin-left: auto; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.verdict { font-weight: 700; }
+.verdict.good { color: var(--good); } .verdict.bad { color: var(--bad); }
+.bar { display: grid; grid-template-columns: 150px 1fr 48px; align-items: center; gap: 8px; font-size: 13px; margin-top: 5px; }
+.bar .track { height: 8px; background: #11151d; border-radius: 4px; overflow: hidden; }
+.bar .fill { height: 100%; border-radius: 4px; }
+.bar span:last-child { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.empty { color: var(--muted); font-size: 14px; }
+.error { color: var(--bad); }
+.note { color: var(--muted); font-size: 12px; margin-top: 12px; }
+.switch { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; cursor: pointer; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Bộ nhớ video bằng mạng nơ-ron xung</h1>
+    <div class="sub">Xem luồng video, dừng bất kỳ lúc nào và hỏi về quá khứ. Ba mô hình SNN cùng trả lời.</div>
+  </div>
+  <div class="chips" id="chips"></div>
+</header>
+<main>
+  <section>
+    <div class="card">
+      <div class="controls" style="margin: 0 0 12px">
+        <select id="streamSelect"></select>
+        <label class="switch"><input type="checkbox" id="showLabels" checked> Hiện nhãn thật trên dòng thời gian</label>
+        <label class="switch"><input type="checkbox" id="autoAsk" checked> Tự dừng ở câu hỏi có sẵn</label>
+      </div>
+      <div class="stage">
+        <canvas id="screen" width="640" height="480"></canvas>
+        <div class="clock" id="clock">0,0 / 32,0 giây</div>
+        <div class="loading" id="loading">Đang tải video…</div>
+      </div>
+      <div class="controls">
+        <button id="play" class="primary">▶ Phát</button>
+        <button id="speed">1×</button>
+        <input type="range" id="seek" min="1" max="256" value="1">
+      </div>
+      <div class="timeline" id="timeline"></div>
+      <div class="ticks"><span>0 s</span><span>8 s</span><span>16 s</span><span>24 s</span><span>32 s</span></div>
+    </div>
+    <div class="card" style="margin-top: 20px">
+      <h2>Câu hỏi có sẵn trong bộ test</h2>
+      <div class="presets" id="presets"></div>
+    </div>
+  </section>
+  <section>
+    <div class="card">
+      <h2>Đặt câu hỏi tại thời điểm đang xem</h2>
+      <div class="tabs" id="tabs">
+        <button data-kind="0">Cách đây N giây?</button>
+        <button data-kind="1">Ở giây thứ T?</button>
+        <button data-kind="2">Hoạt động nào đã xuất hiện?</button>
+        <button data-kind="3">Ngay sau X là gì?</button>
+      </div>
+      <div class="param" id="paramDelay"><label>N (giây trước)</label><input type="range" id="delay" min="1" max="30" value="5"><output id="delayOut">5 giây</output></div>
+      <div class="param" id="paramMoment"><label>T (giây thứ)</label><input type="range" id="moment" min="0" max="29" value="2"><output id="momentOut">giây 2</output></div>
+      <div class="param" id="paramX"><label>Hoạt động X</label><select id="x"></select></div>
+      <div class="param" id="paramOptions"><label>Lựa chọn</label><span class="empty">Hệ thống tự chọn 4 hoạt động, đúng 1 cái đã xuất hiện.</span></div>
+      <button class="primary" id="ask" style="width: 100%">Dừng và hỏi</button>
+    </div>
+    <div class="card" style="margin-top: 20px" id="result">
+      <h2>Kết quả</h2>
+      <div class="empty">Phát video, rồi bấm “Dừng và hỏi”, hoặc chọn một câu hỏi có sẵn.</div>
+    </div>
+  </section>
+</main>
+<script>
+const COLORS = ["#6aa8ff","#f0a85a","#3ccf8e","#ff7aa2","#b48cff","#ffd166","#56d4dd","#ff9f6b","#9ad46a","#e08cff","#7aa0ff","#f2c14e"];
+const MODEL_COLORS = { plus: "var(--plus)", mixer: "var(--mixer)", dmp: "var(--dmp)" };
+const $ = id => document.getElementById(id);
+const fmt = (v, d = 1) => v.toFixed(d).replace(".", ",");
+let info, data, images = [], seen = 1, playing = false, speed = 1, timer = null, kind = 0;
+let evidence = new Set(), askedAt = null, presetsDone = new Set();
+const ctx = $("screen").getContext("2d");
+
+function colorOf(label) {
+  let h = 0; for (const c of label) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return COLORS[h % COLORS.length];
+}
+
+async function init() {
+  info = await (await fetch("/api/info")).json();
+  $("chips").innerHTML = info.models.map(m =>
+    `<span class="chip"><span class="dot" style="background:${MODEL_COLORS[m.kind]}"></span><b>${m.name}</b> · test ${m.test != null ? fmt(m.test) + "%" : "?"} · ${fmt(m.params / 1e6, 2)}M tham số</span>`).join("");
+  $("streamSelect").innerHTML = info.streams.map(s => `<option value="${s.id}">${s.title}</option>`).join("");
+  $("x").innerHTML = info.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+  $("streamSelect").onchange = () => load(+$("streamSelect").value);
+  document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => setKind(+b.dataset.kind));
+  setKind(0);
+  await load(0);
+}
+
+function setKind(k) {
+  kind = k;
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", +b.dataset.kind === k));
+  $("paramDelay").style.display = k === 0 ? "" : "none";
+  $("paramMoment").style.display = k === 1 ? "" : "none";
+  $("paramOptions").style.display = k === 2 ? "" : "none";
+  $("paramX").style.display = k === 3 ? "" : "none";
+}
+
+async function load(id) {
+  pause();
+  $("loading").style.display = "grid";
+  data = await (await fetch(`/api/stream/${id}`)).json();
+  images = await Promise.all(data.frames.map(src => new Promise(resolve => {
+    const img = new Image(); img.onload = () => resolve(img); img.src = "data:image/jpeg;base64," + src;
+  })));
+  $("loading").style.display = "none";
+  evidence = new Set(); askedAt = null; presetsDone = new Set();
+  $("presets").innerHTML = data.presets.map((p, i) =>
+    `<button data-i="${i}"><small>${fmt(p.seen / info.fps)} s</small>${p.text}</button>`).join("");
+  document.querySelectorAll("#presets button").forEach(b => b.onclick = () => askPreset(+b.dataset.i));
+  $("result").innerHTML = `<h2>Kết quả</h2><div class="empty">Phát video, rồi bấm “Dừng và hỏi”, hoặc chọn một câu hỏi có sẵn.</div>`;
+  show(1);
+}
+
+function show(frame) {
+  seen = Math.max(1, Math.min(info.frames, frame));
+  ctx.drawImage(images[seen - 1], 0, 0, 640, 480);
+  $("seek").value = seen;
+  $("clock").textContent = `${fmt(seen / info.fps)} / ${fmt(info.frames / info.fps)} giây`;
+  drawTimeline();
+}
+
+function drawTimeline() {
+  const showLabels = $("showLabels").checked;
+  const total = info.frames;
+  let html = data.segments.map((s, i) => {
+    const left = s.start / total * 100, width = (Math.min(s.end, seen) - s.start) / total * 100;
+    if (s.start >= seen) return `<div class="seg future" style="left:${left}%;width:${(s.end - s.start) / total * 100}%"></div>`;
+    const rest = s.end > seen ? `<div class="seg future" style="left:${seen / total * 100}%;width:${(s.end - seen) / total * 100}%"></div>` : "";
+    return `<div class="seg ${evidence.has(i) ? "evidence" : ""}" style="left:${left}%;width:${width}%;background:${colorOf(s.label)}" title="${s.label}">${showLabels ? s.label : ""}</div>` + rest;
+  }).join("");
+  html += `<div class="playhead" style="left:${seen / total * 100}%"></div>`;
+  if (askedAt) html += `<div class="asked" style="left:${askedAt / total * 100}%"></div>`;
+  $("timeline").innerHTML = html;
+}
+
+function play() {
+  if (seen >= info.frames) show(1);
+  playing = true; $("play").textContent = "⏸ Dừng";
+  timer = setInterval(() => {
+    if (seen >= info.frames) return pause();
+    show(seen + 1);
+    if ($("autoAsk").checked) {
+      const i = data.presets.findIndex((p, j) => p.seen === seen && !presetsDone.has(j));
+      if (i >= 0) askPreset(i);
+    }
+  }, 1000 / info.fps / speed);
+}
+
+function pause() {
+  playing = false; clearInterval(timer); $("play").textContent = "▶ Phát";
+}
+
+$("play").onclick = () => playing ? pause() : play();
+$("speed").onclick = () => { speed = speed === 1 ? 2 : speed === 2 ? 4 : 1; $("speed").textContent = speed + "×"; if (playing) { pause(); play(); } };
+$("seek").oninput = e => { pause(); show(+e.target.value); };
+$("showLabels").onchange = drawTimeline;
+$("delay").oninput = e => $("delayOut").textContent = e.target.value + " giây";
+$("moment").oninput = e => $("momentOut").textContent = "giây " + e.target.value;
+$("ask").onclick = () => ask({ kind, delay: +$("delay").value, moment: +$("moment").value, x: +$("x").value });
+
+function askPreset(i) {
+  const p = data.presets[i];
+  presetsDone.add(i);
+  pause(); show(p.seen); setKind(p.kind);
+  if (p.kind === 0) { $("delay").value = p.delay; $("delayOut").textContent = p.delay + " giây"; }
+  if (p.kind === 1) { $("moment").value = p.moment; $("momentOut").textContent = "giây " + p.moment; }
+  if (p.kind === 3) $("x").value = p.x;
+  ask({ kind: p.kind, delay: p.delay, moment: p.moment, x: p.x, options: p.options });
+}
+
+async function ask(q) {
+  pause();
+  const body = { stream: +$("streamSelect").value, seen, kind: q.kind, delay: q.delay || 0,
+                 moment: q.moment ?? -1, x: q.x ?? -1, options: q.options || [] };
+  if (q.kind !== 1) body.moment = -1;
+  if (q.kind !== 0) body.delay = 0;
+  if (q.kind !== 3) body.x = -1;
+  $("result").innerHTML = `<h2>Kết quả</h2><div class="empty">Đang hỏi ba mô hình…</div>`;
+  const r = await (await fetch("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })).json();
+  if (r.error) {
+    evidence = new Set(); askedAt = null; drawTimeline();
+    $("result").innerHTML = `<h2>Kết quả</h2><div class="error">Không hỏi được câu này lúc ${fmt(seen / info.fps)} giây.</div><div class="empty">${r.error}</div>`;
+    return;
+  }
+  evidence = new Set(r.spans.map(s => s.index)); askedAt = r.seen; drawTimeline();
+  $("result").innerHTML = `<h2>Kết quả lúc ${fmt(r.seen / info.fps)} giây</h2>
+    <div class="qtext">${r.question}</div>
+    <div class="truth"><b>Đáp án đúng: ${r.truth}</b><div class="muted">${r.evidence} Đoạn bằng chứng được viền vàng trên dòng thời gian.</div></div>
+    <div class="models">${r.answers.map(a => `
+      <div class="model" style="border-left-color:${MODEL_COLORS[a.kind]}">
+        <div class="row"><span class="name">${a.name}</span>
+          <span class="verdict ${a.correct ? "good" : "bad"}">${a.correct ? "✓" : "✗"} ${a.answer}</span>
+          <span class="meta">${fmt(a.ms)} ms · tỉ lệ phát xung ${fmt(a.firing * 100)}%</span></div>
+        ${a.top.map(t => `<div class="bar"><span>${t.label}</span><div class="track"><div class="fill" style="width:${t.p * 100}%;background:${MODEL_COLORS[a.kind]}"></div></div><span>${Math.round(t.p * 100)}%</span></div>`).join("")}
+      </div>`).join("")}</div>
+    <div class="note">Mô hình chỉ nhận đặc trưng của các khung hình đến ${fmt(r.seen / info.fps)} giây; phần sau bị xoá trước khi hỏi. Thời gian đo trên CPU của máy này, cho cả luồng.</div>`;
+}
+
+init();
+</script>
+</body>
+</html>

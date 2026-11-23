@@ -252,6 +252,32 @@ class FutureTests(unittest.TestCase):
             vector = S.encode_question(question)
             self.assertEqual(vector.shape[0], S.QUESTION_VECTOR_SIZE)
             self.assertEqual(int(vector.sum()), on_bits)
+            timed = S.encode_question(question, clock=True)
+            self.assertEqual(timed.shape[0], S.QUESTION_VECTOR_SIZE + S.CLOCK_SIZE)
+            self.assertTrue(np.array_equal(timed[:S.QUESTION_VECTOR_SIZE], vector))
+            self.assertEqual(int(timed[S.QUESTION_VECTOR_SIZE:].argmax()), (question.seen_frames - 1) // S.FPS)
+            both = S.encode_question(question, clock=True, relative=True)
+            self.assertEqual(both.shape[0], S.question_size(True, True))
+            self.assertTrue(np.array_equal(both[:len(timed)], timed))
+            self.assertEqual(int(both[len(timed):].sum()), int(S.delay_frames(question) >= 0))
+        # "8 seconds ago" and "at second T" that points to the same moment share the relative spike.
+        ago = S.Question(S.WHAT_WAS_HAPPENING, 97, 1, (span,), 8.0, delay_seconds=8)
+        at = S.Question(S.WHAT_AT_TIME, 97, 1, (span,), 8.0, moment_seconds=4)
+        self.assertEqual(S.delay_frames(ago), S.delay_frames(at))
+        tail = slice(S.question_size(True), None)
+        self.assertTrue(np.array_equal(S.encode_question(ago, True, True)[tail],
+                                       S.encode_question(at, True, True)[tail]))
+
+    def test_relative_delay_stays_in_range_on_real_questions(self):
+        dataset = S.StreamDataset(ROOT, "val")
+        for i in range(500):
+            for q in dataset.sample(i).questions:
+                frames = S.delay_frames(q)
+                if q.kind in (S.WHAT_WAS_HAPPENING, S.WHAT_AT_TIME):
+                    self.assertTrue(0 < frames < q.seen_frames)
+                    self.assertEqual(int(S.encode_question(q, relative=True)[S.QUESTION_VECTOR_SIZE:].sum()), 1)
+                else:
+                    self.assertEqual(frames, -1)
 
 
 if __name__ == "__main__":
