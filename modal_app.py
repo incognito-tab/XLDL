@@ -417,13 +417,11 @@ def plus_compact(seeds: str = "0", ranks: str = "128,64"):
     _run_all(ROUND4_ENCODER, configs, "plus_compact", "plus_compact/summary.json")
 
 
-@app.local_entrypoint()
-def compare_cnn(seeds: str = "0"):
-    """Train two temporal CNNs on the frozen round-4 Spiking ResNet18 features."""
-    seeds = tuple(dict.fromkeys(int(seed) for seed in seeds.split(",")))
-    configs = [dict(MEMORY_BASE, kind="tcn", model={"hidden": 192, "kernel_size": kernel_size},
-                    seed=seed, epochs=60, test=True, clock=True, relative=True)
-               for kernel_size in (2, 4) for seed in seeds]
+def _compare_cnn(models, seeds):
+    seed_values = tuple(dict.fromkeys(int(seed) for seed in seeds.split(",")))
+    configs = [dict(MEMORY_BASE, kind="tcn", model=model, seed=seed, epochs=60, test=True,
+                    clock=True, relative=True)
+               for model in models for seed in seed_values]
     errors = []
     for output in train_memory_job.map([ROUND4_ENCODER] * len(configs), configs, return_exceptions=True):
         if isinstance(output, Exception):
@@ -433,3 +431,21 @@ def compare_cnn(seeds: str = "0"):
         print(json.dumps(_summary(output)), flush=True)
     if errors:
         raise RuntimeError(f"{len(errors)} comparison runs failed: {errors!r}")
+
+
+@app.local_entrypoint()
+def compare_cnn(seeds: str = "0"):
+    """Train two temporal CNNs on the frozen round-4 Spiking ResNet18 features."""
+    _compare_cnn([{"hidden": 192, "kernel_size": kernel_size} for kernel_size in (2, 4)], seeds)
+
+
+@app.local_entrypoint()
+def scale_cnn(seeds: str = "0", widths: str = "384,512", cache_channels: int = 0):
+    """Increase the width of the eight-layer temporal CNN under the same protocol."""
+    hidden_sizes = tuple(dict.fromkeys(int(width) for width in widths.split(",")))
+    if any(width < 1 for width in hidden_sizes):
+        raise ValueError("CNN widths must be positive")
+    if cache_channels < 0:
+        raise ValueError("cache_channels must be nonnegative")
+    settings = {"cache_channels": cache_channels} if cache_channels else {}
+    _compare_cnn([dict(settings, hidden=width, kernel_size=2) for width in hidden_sizes], seeds)

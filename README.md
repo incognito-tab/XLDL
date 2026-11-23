@@ -259,6 +259,13 @@ Lệnh train hai CNN nhân quả theo thời gian với đầu trả lời ReLU.
 
 So sánh điểm CNN trong `results/cnn_comparison/` với các điểm SNN trong `results/round4/` ở cùng seed. `test.mean_acc` là độ chính xác tổng thể, `test.by_kind` là độ chính xác từng loại câu và `test.by_age` cho biết khả năng nhớ theo độ xa. Phép so sánh bao gồm cả mô hình thời gian và đầu trả lời tương ứng. TCN không có neuron xung nên `firing_rate` là `null`.
 
+```bash
+modal run modal_app.py::scale_cnn --widths 384,512
+modal run modal_app.py::scale_cnn --widths 384 --cache-channels 64
+```
+
+Lệnh đầu tăng số kênh của CNN 8 tầng. Lệnh thứ hai thêm phép tích chập nhân quả để lưu một vector 64 chiều mỗi frame. Với câu hỏi theo mốc thời gian, đầu trả lời đọc vector đã lưu tại mốc đó. Cả hai lệnh dùng cùng encoder và lịch train 60 epoch.
+
 ### DualMemoryPlus ít tham số hơn
 
 `memory_rank` giảm hạng của hai phép chiếu Legendre sang neuron LIF. `read_rank` giảm hạng của phép chiếu ở đầu đọc câu hỏi. Cả hai giữ nguyên số kênh, hệ số và cửa sổ nhớ. Có thể train từ đầu theo cùng thiết lập đợt 4 bằng `modal run modal_app.py::plus_compact --ranks 128,64`. Kết quả lưu trong `results/plus_compact/`.

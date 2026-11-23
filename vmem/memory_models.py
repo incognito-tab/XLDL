@@ -266,10 +266,13 @@ class QuestionHead(nn.Module):
 class TemporalConvMemory(nn.Module):
     """An ANN baseline with a causal, 256-frame receptive field."""
 
-    def __init__(self, in_dim, hidden=192, kernel_size=2):
+    def __init__(self, in_dim, hidden=192, kernel_size=2, cache_channels=0):
         super().__init__()
         self.hidden = hidden
+        self.delay_dim = cache_channels
         self.project = nn.Conv1d(in_dim, hidden, 1)
+        if cache_channels:
+            self.cache = nn.Conv1d(hidden, cache_channels, 5)
         dilations = {2: (1, 2, 4, 8, 16, 32, 64, 128), 4: (1, 4, 16, 64)}[kernel_size]
         self.blocks = nn.ModuleList(
             nn.Conv1d(hidden, hidden, kernel_size, dilation=dilation) for dilation in dilations
@@ -277,23 +280,27 @@ class TemporalConvMemory(nn.Module):
 
     def forward(self, features):
         x = self.project(features.transpose(1, 2)).relu()
+        cache = self.cache(F.pad(x, (4, 0))).relu().transpose(1, 2) if self.delay_dim else None
         for conv in self.blocks:
             left_padding = (conv.kernel_size[0] - 1) * conv.dilation[0]
             x = x + conv(F.pad(x, (left_padding, 0))).relu()
-        return x.transpose(1, 2), None
+        return x.transpose(1, 2), cache
 
 
 class TemporalConvHead(nn.Module):
     """Classify from the TCN state and the question at the last visible frame."""
 
-    def __init__(self, hidden, question_dim, num_classes):
+    def __init__(self, hidden, question_dim, num_classes, delay_dim=0):
         super().__init__()
         self.classifier = nn.Sequential(
-            nn.Linear(hidden + question_dim, 256), nn.ReLU(), nn.Linear(256, num_classes)
+            nn.Linear(hidden + question_dim + delay_dim, 256), nn.ReLU(), nn.Linear(256, num_classes)
         )
 
     def forward(self, states, memory, questions, rows, steps_seen, delayed=None):
-        return self.classifier(torch.cat([states[rows, steps_seen], questions], dim=1))
+        inputs = [states[rows, steps_seen], questions]
+        if delayed is not None:
+            inputs.append(delayed)
+        return self.classifier(torch.cat(inputs, dim=1))
 
 
 MODELS = {"mixer": MixerMemory, "dmp": DMPMemory, "plus": DualMemoryPlus, "tcn": TemporalConvMemory}
@@ -309,7 +316,7 @@ class VideoQA(nn.Module):
             self.head = QuestionHead(self.memory.hidden, question_dim, num_classes, self.memory.memory_dim,
                                      delay_dim=self.delay_dim, read_rank=getattr(self.memory, "read_rank", None))
         else:
-            self.head = TemporalConvHead(self.memory.hidden, question_dim, num_classes)
+            self.head = TemporalConvHead(self.memory.hidden, question_dim, num_classes, delay_dim=self.delay_dim)
 
     def forward(self, features, questions, rows, steps_seen, option_mask=None, delays=None):
         """delays: frames back to the moment each question asks about, -1 when none."""
@@ -318,7 +325,12 @@ class VideoQA(nn.Module):
         if self.delay_dim:
             if delays is None:
                 delays = torch.full_like(rows, -1)
-            delayed = self.memory.delay_values(rows, steps_seen, delays)
+            if self.is_spiking:
+                delayed = self.memory.delay_values(rows, steps_seen, delays)
+            else:
+                target = steps_seen - delays.clamp(min=0)
+                delayed = memory[rows, target.clamp(min=0)]
+                delayed = delayed * ((delays >= 0) & (target >= 0)).unsqueeze(1)
         scores = self.head(states, memory, questions, rows, steps_seen, delayed)
         if option_mask is not None:
             scores = scores.masked_fill(~option_mask, float("-inf"))
