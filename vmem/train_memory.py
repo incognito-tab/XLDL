@@ -1,7 +1,7 @@
 """Train and evaluate a memory model on question streams built from encoder features.
 
-The three models get the same features, data, question head, optimiser and
-number of updates. Only the memory model and its own settings differ.
+Models compared with the same encoder get the same features, data, optimiser
+and number of updates. The spiking models share a spiking question head.
 The checkpoint is chosen on validation streams. Test streams are scored only when
 `test=True`, which the final runs use once.
 """
@@ -72,11 +72,13 @@ def evaluate(model, batches, split, stream_ids, batch=128, memory_gate=None):
         correct.append((scores.argmax(1) == b["answers"]).cpu())
         kinds.append(b["kinds"].cpu())
         ages.append(b["ages"].cpu())
-        spike_sum += spikes.float().sum().item()
-        spike_count += spikes.numel()
+        if spikes is not None:
+            spike_sum += spikes.float().sum().item()
+            spike_count += spikes.numel()
     if memory_gate is not None:
         model.memory.set_memory_gate(1.0)
-    return summarize(torch.cat(kinds), torch.cat(correct), torch.cat(ages), spike_sum / spike_count)
+    firing_rate = spike_sum / spike_count if spike_count else None
+    return summarize(torch.cat(kinds), torch.cat(correct), torch.cat(ages), firing_rate)
 
 
 def summarize(kinds, correct, ages, firing_rate):

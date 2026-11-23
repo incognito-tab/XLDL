@@ -29,6 +29,7 @@ import os
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from spikingjelly.activation_based import functional, layer, neuron
 from torch import fft
 
@@ -124,6 +125,15 @@ class DMPMemory(nn.Module):
         return spikes, memory
 
 
+def linear_projection(in_features, out_features, rank=None):
+    """Optionally factor a linear map into two smaller matrices."""
+    if rank is None:
+        return nn.Linear(in_features, out_features)
+    if not 0 < rank * (in_features + out_features) < in_features * out_features:
+        raise ValueError(f"rank={rank} must reduce the size of the {in_features}x{out_features} projection")
+    return nn.Sequential(nn.Linear(in_features, rank, bias=False), nn.Linear(rank, out_features))
+
+
 class VectorMemoryCell(nn.Module):
     """DMP's slow memory with a vector input and several windows.
 
@@ -131,7 +141,8 @@ class VectorMemoryCell(nn.Module):
     the same Legendre memory as DMP, once per window in `thetas`.
     """
 
-    def __init__(self, in_dim, hidden, channels=16, memory_size=10, thetas=(256,), seq_len=256):
+    def __init__(self, in_dim, hidden, channels=16, memory_size=10, thetas=(256,), seq_len=256,
+                 memory_rank=None):
         super().__init__()
         dmp = dmp_module()
         responses = [dmp.LMUFFTCell(1, 1, memory_size, seq_len, theta).fft_H for theta in thetas]
@@ -142,7 +153,7 @@ class VectorMemoryCell(nn.Module):
         self.W_u = nn.Linear(in_dim, channels)
         self.W_x = nn.Linear(in_dim, hidden)
         self.memory_dim = len(thetas) * channels * memory_size
-        self.weight = nn.Linear(self.memory_dim, hidden)
+        self.weight = linear_projection(self.memory_dim, hidden, memory_rank)
         self.lif = neuron.LIFNode(tau=2.0, detach_reset=True, step_mode="m")  # as in DMP
         self.seq_len = seq_len
         self.gamma = 1.0
@@ -173,15 +184,20 @@ class VectorMemoryCell(nn.Module):
 
 class DualMemoryPlus(nn.Module):
     def __init__(self, in_dim, hidden=256, channels=16, memory_size=10, thetas=(256,),
-                 query_read=False, delay_read=False, seq_len=256, **_):
+                 query_read=False, delay_read=False, seq_len=256, memory_rank=None, read_rank=None, **_):
         super().__init__()
         if delay_read and not query_read:
             raise ValueError("delay_read joins the memory read, so it needs query_read")
+        if read_rank is not None and not query_read:
+            raise ValueError("read_rank requires query_read")
         thetas = tuple(thetas)
-        self.layer1 = VectorMemoryCell(in_dim, hidden, channels, memory_size, thetas, seq_len)
-        self.layer2 = VectorMemoryCell(hidden, hidden, channels, memory_size, thetas, seq_len)
+        self.layer1 = VectorMemoryCell(in_dim, hidden, channels, memory_size, thetas, seq_len,
+                                       memory_rank=memory_rank)
+        self.layer2 = VectorMemoryCell(hidden, hidden, channels, memory_size, thetas, seq_len,
+                                       memory_rank=memory_rank)
         self.hidden = hidden
         self.memory_dim = self.layer2.memory_dim if query_read else 0
+        self.read_rank = read_rank
         self.delay_dim = 2 * len(thetas) * channels if delay_read else 0
         self._memories = None
 
@@ -214,14 +230,14 @@ class QuestionHead(nn.Module):
     """
 
     def __init__(self, hidden, question_dim, num_classes, memory_dim=0, width=256, steps=4, window=8,
-                 read_width=256, delay_dim=0):
+                 read_width=256, delay_dim=0, read_rank=None):
         super().__init__()
         self.window = window
         self.steps = steps
         self.memory_dim = memory_dim
         extra = 0
         if memory_dim:
-            self.read = nn.Linear(memory_dim + question_dim + delay_dim, read_width)
+            self.read = linear_projection(memory_dim + question_dim + delay_dim, read_width, read_rank)
             self.read_norm = nn.BatchNorm1d(read_width)
             self.read_lif = neuron.LIFNode(tau=2.0, detach_reset=True, step_mode="m")
             extra = read_width
@@ -247,7 +263,40 @@ class QuestionHead(nn.Module):
         return self.fc2(self.lif(self.fc1(z.contiguous()))).mean(0)
 
 
-MODELS = {"mixer": MixerMemory, "dmp": DMPMemory, "plus": DualMemoryPlus}
+class TemporalConvMemory(nn.Module):
+    """An ANN baseline with a causal, 256-frame receptive field."""
+
+    def __init__(self, in_dim, hidden=192, kernel_size=2):
+        super().__init__()
+        self.hidden = hidden
+        self.project = nn.Conv1d(in_dim, hidden, 1)
+        dilations = {2: (1, 2, 4, 8, 16, 32, 64, 128), 4: (1, 4, 16, 64)}[kernel_size]
+        self.blocks = nn.ModuleList(
+            nn.Conv1d(hidden, hidden, kernel_size, dilation=dilation) for dilation in dilations
+        )
+
+    def forward(self, features):
+        x = self.project(features.transpose(1, 2)).relu()
+        for conv in self.blocks:
+            left_padding = (conv.kernel_size[0] - 1) * conv.dilation[0]
+            x = x + conv(F.pad(x, (left_padding, 0))).relu()
+        return x.transpose(1, 2), None
+
+
+class TemporalConvHead(nn.Module):
+    """Classify from the TCN state and the question at the last visible frame."""
+
+    def __init__(self, hidden, question_dim, num_classes):
+        super().__init__()
+        self.classifier = nn.Sequential(
+            nn.Linear(hidden + question_dim, 256), nn.ReLU(), nn.Linear(256, num_classes)
+        )
+
+    def forward(self, states, memory, questions, rows, steps_seen, delayed=None):
+        return self.classifier(torch.cat([states[rows, steps_seen], questions], dim=1))
+
+
+MODELS = {"mixer": MixerMemory, "dmp": DMPMemory, "plus": DualMemoryPlus, "tcn": TemporalConvMemory}
 
 
 class VideoQA(nn.Module):
@@ -255,19 +304,23 @@ class VideoQA(nn.Module):
         super().__init__()
         self.memory = MODELS[kind](in_dim, **config)
         self.delay_dim = getattr(self.memory, "delay_dim", 0)
-        self.head = QuestionHead(self.memory.hidden, question_dim, num_classes, self.memory.memory_dim,
-                                 delay_dim=self.delay_dim)
+        self.is_spiking = kind != "tcn"
+        if self.is_spiking:
+            self.head = QuestionHead(self.memory.hidden, question_dim, num_classes, self.memory.memory_dim,
+                                     delay_dim=self.delay_dim, read_rank=getattr(self.memory, "read_rank", None))
+        else:
+            self.head = TemporalConvHead(self.memory.hidden, question_dim, num_classes)
 
     def forward(self, features, questions, rows, steps_seen, option_mask=None, delays=None):
         """delays: frames back to the moment each question asks about, -1 when none."""
-        spikes, memory = self.memory(features)
+        states, memory = self.memory(features)
         delayed = None
         if self.delay_dim:
             if delays is None:
                 delays = torch.full_like(rows, -1)
             delayed = self.memory.delay_values(rows, steps_seen, delays)
-        scores = self.head(spikes, memory, questions, rows, steps_seen, delayed)
+        scores = self.head(states, memory, questions, rows, steps_seen, delayed)
         if option_mask is not None:
             scores = scores.masked_fill(~option_mask, float("-inf"))
         reset(self)
-        return scores, spikes
+        return scores, states if self.is_spiking else None

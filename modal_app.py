@@ -80,8 +80,9 @@ def run_name(kind, settings, seed):
 
 
 def save_local(name, payload):
-    os.makedirs(LOCAL_RESULTS, exist_ok=True)
-    with open(os.path.join(LOCAL_RESULTS, name), "w", encoding="utf-8") as handle:
+    path = os.path.join(LOCAL_RESULTS, name)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as handle:
         json.dump(payload, handle, indent=1, ensure_ascii=False)
 
 
@@ -167,7 +168,8 @@ def train_memory_job(encoder, config):
         with open(done) as handle:
             return json.load(handle)
     features = torch.from_numpy(np.load(f"{DATA}/features/{encoder}.npy")).cuda()
-    with open(f"{FRAMES}/index.json") as handle:  # rows are the same for every frame size
+    frames_dir = f"{DATA}/frames112" if encoder == ROUND4_ENCODER else FRAMES
+    with open(f"{frames_dir}/index.json") as handle:  # rows are the same for every frame size
         index = json.load(handle)["clips"]
     output, state = train(ROOT, features, index, config, log=lambda line: print(name, line, flush=True))
     output["name"] = name
@@ -199,8 +201,10 @@ def features(encoder: str = "lite_s0"):
 
 def _summary(output):
     val = output["val"]
+    firing_rate = val["firing_rate"]
     row = {"name": output["name"], "val_mean_acc": round(val["mean_acc"], 4),
-           "val_above_chance": round(val["above_chance"], 4), "firing_rate": round(val["firing_rate"], 4)}
+           "val_above_chance": round(val["above_chance"], 4),
+           "firing_rate": round(firing_rate, 4) if firing_rate is not None else None}
     if "test" in output:
         row["test_mean_acc"] = round(output["test"]["mean_acc"], 4)
     return row
@@ -400,3 +404,32 @@ def round4(seeds: str = "0"):
                     relative=True, test=True)
                for kind, settings in ROUND4_RUNS for seed in seeds.split(",")]
     _run_all(ROUND4_ENCODER, configs, "round4", f"round4_{ROUND4_ENCODER}.json")
+
+
+@app.local_entrypoint()
+def plus_compact(seeds: str = "0", ranks: str = "128,64"):
+    """Evaluate smaller DualMemoryPlus projections under the round-4 protocol."""
+    seed_values = tuple(dict.fromkeys(int(seed) for seed in seeds.split(",")))
+    rank_values = tuple(dict.fromkeys(int(rank) for rank in ranks.split(",")))
+    configs = [dict(MEMORY_BASE, kind="plus", seed=seed, epochs=60, clock=True, relative=True, test=True,
+                    model=dict(ROUND4_PLUS, delay_read=True, memory_rank=rank, read_rank=rank))
+               for rank in rank_values for seed in seed_values]
+    _run_all(ROUND4_ENCODER, configs, "plus_compact", "plus_compact/summary.json")
+
+
+@app.local_entrypoint()
+def compare_cnn(seeds: str = "0"):
+    """Train two temporal CNNs on the frozen round-4 Spiking ResNet18 features."""
+    seeds = tuple(dict.fromkeys(int(seed) for seed in seeds.split(",")))
+    configs = [dict(MEMORY_BASE, kind="tcn", model={"hidden": 192, "kernel_size": kernel_size},
+                    seed=seed, epochs=60, test=True, clock=True, relative=True)
+               for kernel_size in (2, 4) for seed in seeds]
+    errors = []
+    for output in train_memory_job.map([ROUND4_ENCODER] * len(configs), configs, return_exceptions=True):
+        if isinstance(output, Exception):
+            errors.append(output)
+            continue
+        save_local(f"cnn_comparison/{output['name']}.json", output)
+        print(json.dumps(_summary(output)), flush=True)
+    if errors:
+        raise RuntimeError(f"{len(errors)} comparison runs failed: {errors!r}")

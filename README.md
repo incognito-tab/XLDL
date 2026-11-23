@@ -248,6 +248,21 @@ Các bước của đợt 3 và 4 đều được gói trong `modal_app.py`:
 
 **Lưu ý:** sau khi sửa code, phải chạy `modal deploy` trước khi gọi lại. Nếu không, Modal có thể vẫn chạy bản code cũ và trả về kết quả cũ.
 
+### So sánh CNN và SNN
+
+```bash
+modal run modal_app.py::compare_cnn
+modal run modal_app.py::compare_cnn --seeds 0,1,2
+```
+
+Lệnh train hai CNN nhân quả theo thời gian với đầu trả lời ReLU. Một bản có 8 tầng tích chập kernel 2, bản kia có 4 tầng kernel 4. Cả hai dùng 192 kênh, vùng tiếp nhận 256 frame và cùng đặc trưng Spiking ResNet18 `sresnet18_s0_w8` đã lưu trên volume. Các CNN được train 60 epoch theo thiết lập đợt 4. Các lần chạy đã hoàn thành trên volume được dùng lại.
+
+So sánh điểm CNN trong `results/cnn_comparison/` với các điểm SNN trong `results/round4/` ở cùng seed. `test.mean_acc` là độ chính xác tổng thể, `test.by_kind` là độ chính xác từng loại câu và `test.by_age` cho biết khả năng nhớ theo độ xa. Phép so sánh bao gồm cả mô hình thời gian và đầu trả lời tương ứng. TCN không có neuron xung nên `firing_rate` là `null`.
+
+### DualMemoryPlus ít tham số hơn
+
+`memory_rank` giảm hạng của hai phép chiếu Legendre sang neuron LIF. `read_rank` giảm hạng của phép chiếu ở đầu đọc câu hỏi. Cả hai giữ nguyên số kênh, hệ số và cửa sổ nhớ. Có thể train từ đầu theo cùng thiết lập đợt 4 bằng `modal run modal_app.py::plus_compact --ranks 128,64`. Kết quả lưu trong `results/plus_compact/`.
+
 ## Dữ liệu gồm những gì
 
 - **Nguồn:** 24 hoạt động trong [UCF101](https://www.crcv.ucf.edu/data/UCF101.php), gồm 3.255 clip video thật.

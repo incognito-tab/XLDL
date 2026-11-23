@@ -1,0 +1,247 @@
+{
+  "method": "truncated_svd",
+  "source": "plus_channels16_memory_size10_thetas16-64-256_query_readTrue_delay_readTrue_s0_e60_clock_rel_final.pt",
+  "encoder": "sresnet18_s0_w8",
+  "device": "cpu",
+  "eval_batch": 32,
+  "baseline": {
+    "params": 831544,
+    "config": {
+      "epochs": 60,
+      "streams_per_epoch": 4096,
+      "batch": 64,
+      "lr": 0.002,
+      "val_streams": 1024,
+      "test_streams": 2048,
+      "eval_every": 5,
+      "feature_dropout": 0.2,
+      "clock": true,
+      "relative": true,
+      "seed": 0,
+      "test": true,
+      "kind": "plus",
+      "model": {
+        "channels": 16,
+        "memory_size": 10,
+        "thetas": [
+          16,
+          64,
+          256
+        ],
+        "query_read": true,
+        "delay_read": true
+      }
+    },
+    "val": {
+      "mean_acc": 0.6373335495591164,
+      "above_chance": 0.6031655539637027,
+      "by_kind": {
+        "cach_day_N_giay": {
+          "acc": 0.6888889074325562,
+          "n": 1080,
+          "chance": 0.041666666666666664
+        },
+        "o_giay_thu_T": {
+          "acc": 0.7021660804748535,
+          "n": 1108,
+          "chance": 0.041666666666666664
+        },
+        "da_xuat_hien": {
+          "acc": 0.746081531047821,
+          "n": 957,
+          "chance": 0.25
+        },
+        "ngay_sau_X": {
+          "acc": 0.41219767928123474,
+          "n": 951,
+          "chance": 0.041666666666666664
+        }
+      },
+      "by_age": {
+        "0-4s": {
+          "acc": 0.672260582447052,
+          "n": 1013
+        },
+        "4-8s": {
+          "acc": 0.6666666865348816,
+          "n": 933
+        },
+        "8-16s": {
+          "acc": 0.6105263233184814,
+          "n": 1140
+        },
+        "16-32s": {
+          "acc": 0.6227722764015198,
+          "n": 1010
+        }
+      },
+      "firing_rate": 0.15260832011699677
+    },
+    "test": {
+      "mean_acc": 0.616435594856739,
+      "above_chance": 0.5804263223772463,
+      "by_kind": {
+        "cach_day_N_giay": {
+          "acc": 0.6562955975532532,
+          "n": 2057,
+          "chance": 0.041666666666666664
+        },
+        "o_giay_thu_T": {
+          "acc": 0.6897363662719727,
+          "n": 2124,
+          "chance": 0.041666666666666664
+        },
+        "da_xuat_hien": {
+          "acc": 0.7332106828689575,
+          "n": 2174,
+          "chance": 0.25
+        },
+        "ngay_sau_X": {
+          "acc": 0.3864997327327728,
+          "n": 1837,
+          "chance": 0.041666666666666664
+        }
+      },
+      "by_age": {
+        "0-4s": {
+          "acc": 0.6206896305084229,
+          "n": 2117
+        },
+        "4-8s": {
+          "acc": 0.6535348296165466,
+          "n": 1853
+        },
+        "8-16s": {
+          "acc": 0.6015591025352478,
+          "n": 2309
+        },
+        "16-32s": {
+          "acc": 0.6299006938934326,
+          "n": 1913
+        }
+      },
+      "firing_rate": 0.15106280148029327
+    }
+  },
+  "compact": {
+    "params": 551992,
+    "config": {
+      "epochs": 60,
+      "streams_per_epoch": 4096,
+      "batch": 64,
+      "lr": 0.002,
+      "val_streams": 1024,
+      "test_streams": 2048,
+      "eval_every": 5,
+      "feature_dropout": 0.2,
+      "clock": true,
+      "relative": true,
+      "seed": 0,
+      "test": true,
+      "kind": "plus",
+      "model": {
+        "channels": 16,
+        "memory_size": 10,
+        "thetas": [
+          16,
+          64,
+          256
+        ],
+        "query_read": true,
+        "delay_read": true,
+        "memory_rank": 64,
+        "read_rank": 64
+      }
+    },
+    "val": {
+      "mean_acc": 0.6367876529693604,
+      "above_chance": 0.6024444794309312,
+      "by_kind": {
+        "cach_day_N_giay": {
+          "acc": 0.6907407641410828,
+          "n": 1080,
+          "chance": 0.041666666666666664
+        },
+        "o_giay_thu_T": {
+          "acc": 0.7075812220573425,
+          "n": 1108,
+          "chance": 0.041666666666666664
+        },
+        "da_xuat_hien": {
+          "acc": 0.7439916133880615,
+          "n": 957,
+          "chance": 0.25
+        },
+        "ngay_sau_X": {
+          "acc": 0.4048370122909546,
+          "n": 951,
+          "chance": 0.041666666666666664
+        }
+      },
+      "by_age": {
+        "0-4s": {
+          "acc": 0.6752220988273621,
+          "n": 1013
+        },
+        "4-8s": {
+          "acc": 0.6698821187019348,
+          "n": 933
+        },
+        "8-16s": {
+          "acc": 0.6087719202041626,
+          "n": 1140
+        },
+        "16-32s": {
+          "acc": 0.6178217530250549,
+          "n": 1010
+        }
+      },
+      "firing_rate": 0.15074819326400757
+    },
+    "test": {
+      "mean_acc": 0.6117268204689026,
+      "above_chance": 0.5748461795889813,
+      "by_kind": {
+        "cach_day_N_giay": {
+          "acc": 0.6572678685188293,
+          "n": 2057,
+          "chance": 0.041666666666666664
+        },
+        "o_giay_thu_T": {
+          "acc": 0.694915235042572,
+          "n": 2124,
+          "chance": 0.041666666666666664
+        },
+        "da_xuat_hien": {
+          "acc": 0.7240110635757446,
+          "n": 2174,
+          "chance": 0.25
+        },
+        "ngay_sau_X": {
+          "acc": 0.37071311473846436,
+          "n": 1837,
+          "chance": 0.041666666666666664
+        }
+      },
+      "by_age": {
+        "0-4s": {
+          "acc": 0.6150212287902832,
+          "n": 2117
+        },
+        "4-8s": {
+          "acc": 0.6497571468353271,
+          "n": 1853
+        },
+        "8-16s": {
+          "acc": 0.59462970495224,
+          "n": 2309
+        },
+        "16-32s": {
+          "acc": 0.6293779611587524,
+          "n": 1913
+        }
+      },
+      "firing_rate": 0.1491260603070259
+    }
+  }
+}
