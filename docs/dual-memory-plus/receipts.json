@@ -1,0 +1,130 @@
+[
+  {
+    "diagram": "pipeline",
+    "schemaVersion": 1,
+    "ok": true,
+    "command": "deliver",
+    "type": "architecture",
+    "input": "D:\\XLDL\\docs\\dual-memory-plus\\pipeline.json",
+    "output": "D:\\XLDL\\docs\\dual-memory-plus\\pipeline.html",
+    "specification": {
+      "sha256": "c5a7ea6594bfd10232a95e303c3a3874f7e56f43a7b1935741abbe904b805f83",
+      "bytes": 4121
+    },
+    "artifact": {
+      "sha256": "603c3b598f7b860438de0f5f1813fbd25abf853dde281aca8f77eea2a7491951",
+      "bytes": 708956
+    },
+    "validation": {
+      "checksPassed": 9,
+      "checkCount": 9,
+      "compositionProfile": "showcase",
+      "compositionStatus": "pass",
+      "errors": 0,
+      "warnings": 0
+    },
+    "browser_evidence": "passed",
+    "visual_review": "passed",
+    "reviewed_images": [
+      "pipeline.visual-check.1440x900.light.png",
+      "pipeline.visual-check.2048x1320.dark.png"
+    ],
+    "correction_rounds": 0
+  },
+  {
+    "diagram": "model",
+    "schemaVersion": 1,
+    "ok": true,
+    "command": "deliver",
+    "type": "architecture",
+    "input": "D:\\XLDL\\docs\\dual-memory-plus\\model.json",
+    "output": "D:\\XLDL\\docs\\dual-memory-plus\\model.html",
+    "specification": {
+      "sha256": "effff3169d3bf03705c97d51845c9c5ca842005baea3f191098d9c6987ba526a",
+      "bytes": 5998
+    },
+    "artifact": {
+      "sha256": "6b43ca551caf2843db85a15ec5baaec0e1312846a23b6da54ea7c38e83951fcd",
+      "bytes": 715607
+    },
+    "validation": {
+      "checksPassed": 9,
+      "checkCount": 9,
+      "compositionProfile": "showcase",
+      "compositionStatus": "pass",
+      "errors": 0,
+      "warnings": 0
+    },
+    "browser_evidence": "passed",
+    "visual_review": "passed",
+    "reviewed_images": [
+      "model.visual-check.1440x900.light.png",
+      "model.visual-check.2048x1320.dark.png"
+    ],
+    "correction_rounds": 1
+  },
+  {
+    "diagram": "cell",
+    "schemaVersion": 1,
+    "ok": true,
+    "command": "deliver",
+    "type": "architecture",
+    "input": "D:\\XLDL\\docs\\dual-memory-plus\\cell.json",
+    "output": "D:\\XLDL\\docs\\dual-memory-plus\\cell.html",
+    "specification": {
+      "sha256": "e79c1299561fbf2be0824cb1986334cdcf97002bf2fba32c059db4bdafa559c6",
+      "bytes": 4137
+    },
+    "artifact": {
+      "sha256": "fb27356e4089bec0b4456cf532ab25eec5053ceb0d641ca917c11843b3de14f9",
+      "bytes": 708622
+    },
+    "validation": {
+      "checksPassed": 9,
+      "checkCount": 9,
+      "compositionProfile": "showcase",
+      "compositionStatus": "pass",
+      "errors": 0,
+      "warnings": 0
+    },
+    "browser_evidence": "passed",
+    "visual_review": "passed",
+    "reviewed_images": [
+      "cell.visual-check.1440x900.light.png",
+      "cell.visual-check.2048x1320.dark.png"
+    ],
+    "correction_rounds": 0
+  },
+  {
+    "diagram": "backward",
+    "schemaVersion": 1,
+    "ok": true,
+    "command": "deliver",
+    "type": "architecture",
+    "input": "D:\\XLDL\\docs\\dual-memory-plus\\backward.json",
+    "output": "D:\\XLDL\\docs\\dual-memory-plus\\backward.html",
+    "specification": {
+      "sha256": "59ad67f48de7ec7b50fca69140297f2943072da51888e19406d3fd314ea34bbd",
+      "bytes": 5251
+    },
+    "artifact": {
+      "sha256": "a62a7211327e104a9454623d8f76585d43afde773f63a717983e9ecfdc0267d0",
+      "bytes": 712438
+    },
+    "validation": {
+      "checksPassed": 9,
+      "checkCount": 9,
+      "compositionProfile": "showcase",
+      "compositionStatus": "pass",
+      "errors": 0,
+      "warnings": 0
+    },
+    "browser_evidence": "passed",
+    "visual_review": "passed",
+    "reviewed_images": [
+      "backward.visual-check.1440x900.light.png",
+      "backward.visual-check.2048x1320.dark.png"
+    ],
+    "correction_rounds": 2
+  }
+]

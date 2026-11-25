@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Bên trong một VectorMemoryCell",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1320,
+      620
+    ],
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "components": [
+    {
+      "id": "input",
+      "label": "Đầu vào xₜ",
+      "sublabel": "512 chiều tầng 1 • 256 ở tầng 2",
+      "type": "database",
+      "pos": [
+        35,
+        253
+      ],
+      "size": [
+        225,
+        78
+      ]
+    },
+    {
+      "id": "wx",
+      "label": "Nhánh nhanh Wₓ",
+      "sublabel": "Linear C → 256",
+      "type": "backend",
+      "pos": [
+        348,
+        99
+      ],
+      "size": [
+        204,
+        78
+      ]
+    },
+    {
+      "id": "wu",
+      "label": "Chiếu Wᵤ và ReLU",
+      "sublabel": "Linear C → 16",
+      "type": "backend",
+      "pos": [
+        348,
+        390
+      ],
+      "size": [
+        204,
+        78
+      ]
+    },
+    {
+      "id": "lmu",
+      "label": "LMU Legendre",
+      "sublabel": "θ ∈ {16, 64, 256} bước",
+      "type": "backend",
+      "pos": [
+        620,
+        390
+      ],
+      "size": [
+        204,
+        78
+      ]
+    },
+    {
+      "id": "project",
+      "label": "Chiếu trạng thái nhớ",
+      "sublabel": "Linear 480 → 256",
+      "type": "backend",
+      "pos": [
+        892,
+        390
+      ],
+      "size": [
+        204,
+        78
+      ]
+    },
+    {
+      "id": "sum",
+      "label": "Cộng hai nhánh",
+      "sublabel": "Wₓxₜ + chiếu(mₜ)",
+      "type": "backend",
+      "pos": [
+        892,
+        99
+      ],
+      "size": [
+        204,
+        78
+      ]
+    },
+    {
+      "id": "lif",
+      "label": "LIF",
+      "sublabel": "τ = 2 • 256 xung nhị phân",
+      "type": "frontend",
+      "pos": [
+        1155,
+        99
+      ],
+      "size": [
+        145,
+        78
+      ]
+    },
+    {
+      "id": "read",
+      "label": "Trạng thái đưa ra đọc",
+      "sublabel": "mₜ có 480 giá trị",
+      "type": "backend",
+      "pos": [
+        620,
+        530
+      ],
+      "size": [
+        204,
+        78
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "from": "input",
+      "to": "wx",
+      "label": "xₜ",
+      "fromSide": "right",
+      "toSide": "left",
+      "variant": "default"
+    },
+    {
+      "from": "input",
+      "to": "wu",
+      "label": "xₜ",
+      "fromSide": "right",
+      "toSide": "left",
+      "variant": "default"
+    },
+    {
+      "from": "wx",
+      "to": "sum",
+      "label": "Tín hiệu nhanh • 256",
+      "fromSide": "right",
+      "toSide": "left",
+      "variant": "default"
+    },
+    {
+      "from": "wu",
+      "to": "lmu",
+      "label": "uₜ • 16",
+      "fromSide": "right",
+      "toSide": "left",
+      "variant": "default"
+    },
+    {
+      "from": "lmu",
+      "to": "project",
+      "label": "mₜ • 480",
+      "fromSide": "right",
+      "toSide": "left",
+      "variant": "default"
+    },
+    {
+      "from": "project",
+      "to": "sum",
+      "label": "Tín hiệu chậm • 256",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "variant": "default"
+    },
+    {
+      "from": "sum",
+      "to": "lif",
+      "label": "256",
+      "fromSide": "right",
+      "toSide": "left",
+      "variant": "emphasis"
+    },
+    {
+      "from": "lmu",
+      "to": "read",
+      "label": "mₜ",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "variant": "default",
+      "labelAt": [
+        752,
+        498
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Tính trạng thái theo thời gian",
+      "items": [
+        "mₜ = A mₜ₋₁ + B uₜ. Bản hiện thực dùng tích chập FFT nhân quả với đáp ứng xung cố định. Mỗi mₜ gồm 3 × 16 × 10 giá trị."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Hai đầu ra của tầng",
+      "items": [
+        "Xung tầng 1 đi vào tầng 2. Đầu đọc lấy trạng thái nhớ mₜ, còn đầu phân loại dùng trung bình xung tầng 2 ở 8 frame gần nhất."
+      ]
+    }
+  ]
+}

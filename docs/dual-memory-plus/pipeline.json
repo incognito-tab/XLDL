@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Luồng dữ liệu UCF101 đến đáp án",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1240,
+      540
+    ],
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "components": [
+    {
+      "id": "data",
+      "label": "UCF101",
+      "sublabel": "24 lớp • 3.255 clip",
+      "type": "external",
+      "pos": [
+        30,
+        75
+      ],
+      "size": [
+        205,
+        76
+      ]
+    },
+    {
+      "id": "frames",
+      "label": "Lấy mẫu và resize",
+      "sublabel": "RGB 112×112 • 8 FPS",
+      "type": "backend",
+      "pos": [
+        335,
+        75
+      ],
+      "size": [
+        220,
+        76
+      ]
+    },
+    {
+      "id": "encoder",
+      "label": "Spiking ResNet18",
+      "sublabel": "Train riêng trên cửa sổ 8 frame",
+      "type": "backend",
+      "pos": [
+        655,
+        75
+      ],
+      "size": [
+        225,
+        76
+      ]
+    },
+    {
+      "id": "store",
+      "label": "Kho đặc trưng w8",
+      "sublabel": "512 giá trị mỗi frame • float16",
+      "type": "database",
+      "pos": [
+        980,
+        75
+      ],
+      "size": [
+        225,
+        76
+      ]
+    },
+    {
+      "id": "qa",
+      "label": "Sinh luồng và câu hỏi",
+      "sublabel": "32 giây • 4 câu mỗi luồng",
+      "type": "backend",
+      "pos": [
+        30,
+        301
+      ],
+      "size": [
+        205,
+        76
+      ]
+    },
+    {
+      "id": "batch",
+      "label": "Ghép đặc trưng",
+      "sublabel": "X [B, 256, 512] • q, t, Δ",
+      "type": "backend",
+      "pos": [
+        335,
+        301
+      ],
+      "size": [
+        220,
+        76
+      ]
+    },
+    {
+      "id": "plus",
+      "label": "DualMemoryPlus",
+      "sublabel": "Hai tầng Legendre + delay_read",
+      "type": "backend",
+      "pos": [
+        655,
+        301
+      ],
+      "size": [
+        225,
+        76
+      ]
+    },
+    {
+      "id": "result",
+      "label": "Điểm 24 hành động",
+      "sublabel": "Argmax hoặc giới hạn 4 lựa chọn",
+      "type": "frontend",
+      "pos": [
+        980,
+        301
+      ],
+      "size": [
+        225,
+        76
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "from": "data",
+      "to": "frames",
+      "label": "Clip AVI",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "from": "frames",
+      "to": "encoder",
+      "label": "Ảnh RGB",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "from": "encoder",
+      "to": "store",
+      "label": "Trích đặc trưng",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "from": "data",
+      "to": "qa",
+      "label": "Metadata theo tập",
+      "variant": "default",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        185,
+        224
+      ]
+    },
+    {
+      "from": "qa",
+      "to": "batch",
+      "label": "Chỉ mục đoạn",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "from": "store",
+      "to": "batch",
+      "label": "Hàng đặc trưng",
+      "variant": "default",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "batch",
+      "to": "plus",
+      "label": "X, q, t, Δ",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "from": "plus",
+      "to": "result",
+      "label": "24 logits",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Dữ liệu",
+      "items": [
+        "1.939 train • 398 validation • 918 test. Chia theo nhóm video nguồn."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Hai giai đoạn train",
+      "items": [
+        "Encoder học nhận diện hành động. Khi train bộ nhớ, encoder đã cố định và đặc trưng được đọc từ file."
+      ]
+    }
+  ]
+}

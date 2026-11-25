@@ -1,0 +1,300 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Chi tiết DualMemoryPlus + delay_read",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1380,
+      610
+    ],
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "components": [
+    {
+      "id": "x",
+      "label": "Đặc trưng ảnh",
+      "sublabel": "X [B, 256, 512]",
+      "type": "database",
+      "pos": [
+        28,
+        92
+      ],
+      "size": [
+        170,
+        76
+      ]
+    },
+    {
+      "id": "layer1",
+      "label": "Tầng 1 • VectorMemoryCell",
+      "sublabel": "512 vào • 16 kênh nhớ • 256 LIF",
+      "type": "backend",
+      "pos": [
+        254,
+        92
+      ],
+      "size": [
+        240,
+        76
+      ]
+    },
+    {
+      "id": "layer2",
+      "label": "Tầng 2 • VectorMemoryCell",
+      "sublabel": "256 vào • 16 kênh nhớ • 256 LIF",
+      "type": "backend",
+      "pos": [
+        555,
+        92
+      ],
+      "size": [
+        240,
+        76
+      ]
+    },
+    {
+      "id": "rate",
+      "label": "Tỉ lệ xung gần nhất",
+      "sublabel": "Trung bình 8 frame đến t • 256",
+      "type": "backend",
+      "pos": [
+        855,
+        92
+      ],
+      "size": [
+        220,
+        76
+      ]
+    },
+    {
+      "id": "head",
+      "label": "Đầu phân loại",
+      "sublabel": "Linear 688→256 → LIF → 24",
+      "type": "frontend",
+      "pos": [
+        1128,
+        92
+      ],
+      "size": [
+        205,
+        76
+      ]
+    },
+    {
+      "id": "state1",
+      "label": "Trạng thái m₁ tại t",
+      "sublabel": "3 cửa sổ × 16 kênh × 10 hệ số",
+      "type": "database",
+      "pos": [
+        254,
+        290
+      ],
+      "size": [
+        240,
+        76
+      ]
+    },
+    {
+      "id": "state2",
+      "label": "Trạng thái m₂ tại t",
+      "sublabel": "3 cửa sổ × 16 kênh × 10 hệ số",
+      "type": "database",
+      "pos": [
+        555,
+        290
+      ],
+      "size": [
+        240,
+        76
+      ]
+    },
+    {
+      "id": "read",
+      "label": "Đầu đọc câu hỏi",
+      "sublabel": "Linear 752→256 → BN → LIF",
+      "type": "backend",
+      "pos": [
+        1128,
+        290
+      ],
+      "size": [
+        205,
+        76
+      ]
+    },
+    {
+      "id": "decode",
+      "label": "Giải mã delay_read",
+      "sublabel": "m₁ và m₂ tại t → 48 + 48 giá trị",
+      "type": "backend",
+      "pos": [
+        555,
+        480
+      ],
+      "size": [
+        240,
+        76
+      ]
+    },
+    {
+      "id": "q",
+      "label": "Câu hỏi",
+      "sublabel": "q 176 chiều • độ trễ Δ theo frame",
+      "type": "external",
+      "pos": [
+        1128,
+        480
+      ],
+      "size": [
+        205,
+        76
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "from": "x",
+      "to": "layer1",
+      "label": "512",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "from": "layer1",
+      "to": "layer2",
+      "label": "256 xung",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "from": "layer2",
+      "to": "rate",
+      "label": "256 xung",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "from": "rate",
+      "to": "head",
+      "label": "256",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "from": "layer1",
+      "to": "state1",
+      "label": "480",
+      "variant": "default",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        392,
+        228
+      ]
+    },
+    {
+      "from": "layer2",
+      "to": "state2",
+      "label": "480",
+      "variant": "default",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        693,
+        228
+      ]
+    },
+    {
+      "from": "state1",
+      "to": "decode",
+      "label": "480 từ m₁",
+      "variant": "default",
+      "fromSide": "bottom",
+      "toSide": "left"
+    },
+    {
+      "from": "state2",
+      "to": "decode",
+      "label": "480 từ m₂",
+      "variant": "default",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        709,
+        425
+      ]
+    },
+    {
+      "from": "state2",
+      "to": "read",
+      "label": "480 trạng thái • query_read",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "from": "decode",
+      "to": "read",
+      "label": "96 giá trị",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "bottom"
+    },
+    {
+      "from": "q",
+      "to": "decode",
+      "label": "Δ",
+      "variant": "default",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "from": "q",
+      "to": "read",
+      "label": "q • 176",
+      "variant": "default",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "from": "read",
+      "to": "head",
+      "label": "256 xung đọc",
+      "variant": "emphasis",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "from": "q",
+      "to": "head",
+      "label": "q • 176",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "right"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Bên trong mỗi tầng",
+      "items": [
+        "Nhánh nhanh Wₓx. Nhánh chậm ReLU(Wᵤx) → LMU Legendre qua FFT → chiếu 480→256. Cộng hai nhánh rồi phát xung qua LIF, τ=2."
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Đọc ngược về mốc được hỏi",
+      "items": [
+        "Trọng số Legendre cố định Pᵢ(2Δ/θ−1). θ = 16, 64, 256 bước. Cửa sổ có Δ ≥ θ đóng góp 0. Hai đầu LIF đọc và phân loại chạy 4 bước.",
+        "Đầu phân loại nhận trực tiếp q (176 chiều), cùng 256 tỉ lệ xung và 256 xung đọc."
+      ]
+    }
+  ]
+}

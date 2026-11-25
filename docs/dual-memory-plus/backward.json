@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Lan truyền ngược khi train DualMemoryPlus",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1320,
+      595
+    ],
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "components": [
+    {
+      "id": "loss",
+      "label": "Cross-entropy",
+      "sublabel": "Logits đã mask và đáp án đúng",
+      "type": "frontend",
+      "pos": [
+        1060,
+        76
+      ],
+      "size": [
+        230,
+        76
+      ]
+    },
+    {
+      "id": "head",
+      "label": "Đầu phân loại",
+      "sublabel": "Linear 256→24 • LIF • Linear 688→256",
+      "type": "backend",
+      "pos": [
+        715,
+        76
+      ],
+      "size": [
+        255,
+        76
+      ]
+    },
+    {
+      "id": "spikes",
+      "label": "Xung tầng 2",
+      "sublabel": "Gradient qua trung bình 8 frame",
+      "type": "backend",
+      "pos": [
+        375,
+        76
+      ],
+      "size": [
+        235,
+        76
+      ]
+    },
+    {
+      "id": "layer2",
+      "label": "Tầng 2",
+      "sublabel": "LIF → nhánh nhanh và nhánh LMU",
+      "type": "backend",
+      "pos": [
+        40,
+        76
+      ],
+      "size": [
+        235,
+        76
+      ]
+    },
+    {
+      "id": "read",
+      "label": "Đầu đọc câu hỏi",
+      "sublabel": "LIF → BatchNorm → Linear",
+      "type": "backend",
+      "pos": [
+        715,
+        280
+      ],
+      "size": [
+        255,
+        76
+      ]
+    },
+    {
+      "id": "m2",
+      "label": "Trạng thái m₂ tại t",
+      "sublabel": "Đọc trực tiếp và qua delay_read",
+      "type": "database",
+      "pos": [
+        375,
+        280
+      ],
+      "size": [
+        235,
+        76
+      ]
+    },
+    {
+      "id": "layer1",
+      "label": "Tầng 1",
+      "sublabel": "Nhận gradient từ tầng 2 và từ m₁",
+      "type": "backend",
+      "pos": [
+        40,
+        445
+      ],
+      "size": [
+        235,
+        76
+      ]
+    },
+    {
+      "id": "decode",
+      "label": "delay_read",
+      "sublabel": "Gradient qua phép chiếu Legendre",
+      "type": "backend",
+      "pos": [
+        715,
+        445
+      ],
+      "size": [
+        255,
+        76
+      ]
+    },
+    {
+      "id": "m1",
+      "label": "Trạng thái m₁ tại t",
+      "sublabel": "Gradient về ReLU(Wᵤx) qua LMU",
+      "type": "database",
+      "pos": [
+        375,
+        445
+      ],
+      "size": [
+        235,
+        76
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "from": "loss",
+      "to": "head",
+      "label": "∂loss/∂logits",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "from": "head",
+      "to": "spikes",
+      "label": "Qua tỉ lệ xung",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "from": "spikes",
+      "to": "layer2",
+      "label": "Gradient xung",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "from": "head",
+      "to": "read",
+      "label": "Qua xung đọc",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        910,
+        215
+      ]
+    },
+    {
+      "from": "read",
+      "to": "m2",
+      "label": "Nhánh query_read",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "from": "m2",
+      "to": "layer2",
+      "label": "Gradient theo t",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "bottom",
+      "labelAt": [
+        258,
+        242
+      ]
+    },
+    {
+      "from": "read",
+      "to": "decode",
+      "label": "Nhánh delay_read",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "right",
+      "labelAt": [
+        1056,
+        396
+      ]
+    },
+    {
+      "from": "decode",
+      "to": "m1",
+      "label": "Gradient về m₁",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "right",
+      "labelAt": [
+        662,
+        510
+      ]
+    },
+    {
+      "from": "decode",
+      "to": "m2",
+      "label": "Gradient về m₂",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "from": "m1",
+      "to": "layer1",
+      "label": "Qua LMU",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "from": "layer2",
+      "to": "layer1",
+      "label": "Qua xung tầng 1",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "left",
+      "labelAt": [
+        76,
+        393
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Surrogate gradient",
+      "items": [
+        "LIF phát xung nhị phân ở lượt xuôi. Lan truyền ngược dùng đạo hàm xấp xỉ. detach_reset=True tách thao tác reset khỏi đường đạo hàm."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Phạm vi cập nhật",
+      "items": [
+        "loss.backward() → clip norm 1,0 → AdamW. Gradient đi xuyên qua phép FFT và phép đọc cố định về tham số học được. Encoder, fft_H và bộ giải mã cố định."
+      ]
+    }
+  ]
+}
