@@ -32,7 +32,7 @@ ROOT = os.environ.get("UCF101_ROOT", "data/ucf101")
 DEMO = os.environ.get("DEMO_DIR", "data/demo")
 STREAMS_LISTED = 40
 FRAME_SIZE = (320, 240)
-MODEL_NAMES = {"plus": "Bản nâng cấp", "mixer": "Mixer-SNN tốt nhất", "dmp": "DMP-SNN tốt nhất"}
+MODEL_NAMES = {"plus": "Bản nâng cấp", "mixer": "Mixer-SNN", "dmp": "DMP-SNN"}
 KIND_ORDER = ("plus", "mixer", "dmp")
 
 torch.set_grad_enabled(False)
@@ -80,6 +80,20 @@ def results_summary():
 
 
 SCORES = results_summary()
+
+
+def warm_up():
+    """Run each model once so the first question's timing is not inflated by start-up work."""
+    rows, steps = torch.tensor([0]), torch.tensor([S.STREAM_FRAMES - 1])
+    x = torch.zeros(1, S.STREAM_FRAMES, FEATURES.shape[1])
+    for entry in MODELS.values():
+        config = entry["config"]
+        questions = torch.zeros(1, S.question_size(config.get("clock", False), config.get("relative", False)))
+        for _ in range(2):
+            entry["model"](x, questions, rows, steps, None, torch.tensor([8]))
+
+
+warm_up()
 
 
 def read_frames(path, numbers):
