@@ -1,606 +1,1297 @@
 <!doctype html>
 <html lang="vi">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Báo cáo cuối kì</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root {
-  --ink: #16181d; --muted: #6b7280; --line: #e5e7eb; --soft: #f4f5f7;
-  --accent: #2563eb; --accent-soft: #dbe7ff; --gray: #9ca3af; --good: #15803d; --bad: #b91c1c;
-}
-* { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; background: #e9ebef; font-family: "Be Vietnam Pro", system-ui, sans-serif; color: var(--ink); overflow: hidden; }
-.deck { position: absolute; left: 50%; top: 50%; width: 1280px; height: 720px; transform-origin: center; }
-.slide { position: absolute; inset: 0; background: #fff; padding: 64px 80px 56px; display: none; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,.12); }
-.slide.active { display: flex; }
-.num { position: absolute; right: 40px; bottom: 26px; font-size: 14px; color: var(--gray); font-variant-numeric: tabular-nums; }
-.sec { position: absolute; left: 80px; bottom: 26px; font-size: 14px; color: var(--gray); }
-.kicker { font-size: 15px; font-weight: 600; color: var(--accent); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
-h1 { font-size: 52px; line-height: 1.15; margin: 0; font-weight: 700; letter-spacing: -.01em; }
-h2 { font-size: 38px; line-height: 1.2; margin: 0 0 34px; font-weight: 700; letter-spacing: -.01em; }
-p, li { font-size: 23px; line-height: 1.5; }
-ul { margin: 0; padding-left: 26px; }
-li { margin: 6px 0; }
-li::marker { color: var(--accent); }
-.muted { color: var(--muted); }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
-.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
-.fill { flex: 1; display: flex; flex-direction: column; justify-content: center; }
-.big { font-size: 64px; font-weight: 700; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }
-.big.gray { color: var(--ink); }
-.cap { font-size: 18px; color: var(--muted); margin-top: 8px; }
-table { border-collapse: collapse; width: 100%; font-size: 21px; }
-th { text-align: left; font-weight: 600; color: var(--muted); font-size: 16px; border-bottom: 2px solid var(--ink); padding: 8px 12px; }
-td { padding: 11px 12px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
-td.r, th.r { text-align: right; }
-tr.hl td { font-weight: 700; color: var(--accent); }
-.bars { display: grid; grid-template-columns: 190px 1fr 74px; gap: 12px 16px; align-items: center; font-size: 20px; }
-.bars .t { height: 26px; background: var(--soft); border-radius: 4px; overflow: hidden; }
-.bars .b { height: 100%; background: var(--gray); border-radius: 4px; }
-.bars .b.a { background: var(--accent); }
-.bars .v { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
-.box { border: 1.5px solid var(--line); border-radius: 10px; padding: 18px 22px; }
-.box h3 { margin: 0 0 6px; font-size: 22px; }
-.box p { margin: 0; font-size: 19px; color: var(--muted); line-height: 1.45; }
-.flow { display: flex; align-items: center; gap: 14px; }
-.flow .step { flex: 1; border: 1.5px solid var(--line); border-radius: 10px; padding: 16px; text-align: center; font-size: 19px; line-height: 1.35; }
-.flow .step b { display: block; font-size: 21px; margin-bottom: 4px; }
-.flow .step.a { border-color: var(--accent); background: var(--accent-soft); }
-.flow .arrow { color: var(--gray); font-size: 26px; }
-.timeline { display: flex; height: 54px; border-radius: 6px; overflow: hidden; }
-.timeline div { display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; color: #fff; border-right: 3px solid #fff; }
-.tag { display: inline-block; font-size: 15px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
-.legend { display: flex; gap: 22px; font-size: 17px; color: var(--muted); margin-bottom: 16px; }
-.legend i { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
-.agenda { counter-reset: a; list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 60px; }
-.agenda li { counter-increment: a; font-size: 26px; padding: 14px 0; border-bottom: 1px solid var(--line); }
-.agenda li::before { content: counter(a, decimal-leading-zero); color: var(--accent); font-weight: 700; margin-right: 18px; }
-.mock { border: 1.5px solid var(--line); border-radius: 10px; padding: 14px; display: grid; grid-template-columns: 1.3fr 1fr; gap: 12px; height: 380px; }
-.mock div { background: var(--soft); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 16px; text-align: center; padding: 8px; }
-.nav { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; opacity: .0; transition: opacity .2s; }
-body:hover .nav { opacity: .9; }
-.nav button { font: inherit; font-size: 14px; border: 1px solid #cfd3da; background: #fff; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
-@media print {
-  html, body { overflow: visible; background: #fff; }
-  .deck { position: static; transform: none !important; width: auto; height: auto; }
-  .slide { position: relative; display: flex !important; width: 1280px; height: 720px; page-break-after: always; box-shadow: none; }
-  .nav { display: none; }
-  @page { size: 1280px 720px; margin: 0; }
-}
-</style>
-</head>
-<body>
-<div class="deck" id="deck">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Báo cáo cuối kì</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #16181d;
+        --muted: #6b7280;
+        --line: #e5e7eb;
+        --soft: #f4f5f7;
+        --accent: #2563eb;
+        --accent-soft: #dbe7ff;
+        --gray: #9ca3af;
+        --good: #15803d;
+        --bad: #b91c1c;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #e9ebef;
+        font-family: "Be Vietnam Pro", system-ui, sans-serif;
+        color: var(--ink);
+        overflow: hidden;
+      }
+      .deck {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 1280px;
+        height: 720px;
+        transform-origin: center;
+      }
+      .slide {
+        position: absolute;
+        inset: 0;
+        background: #fff;
+        padding: 64px 80px 56px;
+        display: none;
+        flex-direction: column;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+      }
+      .slide.active {
+        display: flex;
+      }
+      .num {
+        position: absolute;
+        right: 40px;
+        bottom: 26px;
+        font-size: 14px;
+        color: var(--gray);
+        font-variant-numeric: tabular-nums;
+      }
+      .kicker {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--accent);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+      h1 {
+        font-size: 52px;
+        line-height: 1.15;
+        margin: 0;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+      h2 {
+        font-size: 38px;
+        line-height: 1.2;
+        margin: 0 0 34px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+      p,
+      li {
+        font-size: 23px;
+        line-height: 1.5;
+      }
+      ul {
+        margin: 0;
+        padding-left: 26px;
+      }
+      li {
+        margin: 6px 0;
+      }
+      li::marker {
+        color: var(--accent);
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 56px;
+        align-items: start;
+      }
+      .grid3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 32px;
+      }
+      .fill {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .big {
+        font-size: 64px;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--accent);
+        font-variant-numeric: tabular-nums;
+      }
+      .big.gray {
+        color: var(--ink);
+      }
+      .cap {
+        font-size: 18px;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 21px;
+      }
+      th {
+        text-align: left;
+        font-weight: 600;
+        color: var(--muted);
+        font-size: 16px;
+        border-bottom: 2px solid var(--ink);
+        padding: 8px 12px;
+      }
+      td {
+        padding: 11px 12px;
+        border-bottom: 1px solid var(--line);
+        font-variant-numeric: tabular-nums;
+      }
+      td.r,
+      th.r {
+        text-align: right;
+      }
+      tr.hl td {
+        font-weight: 700;
+        color: var(--accent);
+      }
+      .bars {
+        display: grid;
+        grid-template-columns: 190px 1fr 74px;
+        gap: 12px 16px;
+        align-items: center;
+        font-size: 20px;
+      }
+      .bars .t {
+        height: 26px;
+        background: var(--soft);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .bars .b {
+        height: 100%;
+        background: var(--gray);
+        border-radius: 4px;
+      }
+      .bars .b.a {
+        background: var(--accent);
+      }
+      .bars .v {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+      }
+      .box {
+        border: 1.5px solid var(--line);
+        border-radius: 10px;
+        padding: 18px 22px;
+      }
+      .box h3 {
+        margin: 0 0 6px;
+        font-size: 22px;
+      }
+      .box p {
+        margin: 0;
+        font-size: 19px;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+      .flow {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .flow .step {
+        flex: 1;
+        border: 1.5px solid var(--line);
+        border-radius: 10px;
+        padding: 16px;
+        text-align: center;
+        font-size: 19px;
+        line-height: 1.35;
+      }
+      .flow .step b {
+        display: block;
+        font-size: 21px;
+        margin-bottom: 4px;
+      }
+      .flow .step.a {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+      }
+      .flow .arrow {
+        color: var(--gray);
+        font-size: 26px;
+      }
+      .theory-figure {
+        margin: 0;
+      }
+      .theory-figure img {
+        display: block;
+        width: 100%;
+        height: 450px;
+        object-fit: contain;
+      }
+      .theory-figure figcaption {
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.4;
+      }
+      .timeline {
+        display: flex;
+        height: 54px;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .timeline div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        border-right: 3px solid #fff;
+      }
+      .tag {
+        display: inline-block;
+        font-size: 15px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+      .legend {
+        display: flex;
+        gap: 22px;
+        font-size: 17px;
+        color: var(--muted);
+        margin-bottom: 16px;
+      }
+      .legend i {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        margin-right: 6px;
+        vertical-align: -1px;
+      }
+      .agenda {
+        counter-reset: a;
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 60px;
+      }
+      .agenda li {
+        counter-increment: a;
+        font-size: 26px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .agenda li::before {
+        content: counter(a, decimal-leading-zero);
+        color: var(--accent);
+        font-weight: 700;
+        margin-right: 18px;
+      }
+      .mock {
+        border: 1.5px solid var(--line);
+        border-radius: 10px;
+        padding: 14px;
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        gap: 12px;
+        height: 380px;
+      }
+      .mock div {
+        background: var(--soft);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted);
+        font-size: 16px;
+        text-align: center;
+        padding: 8px;
+      }
+      .nav {
+        position: fixed;
+        bottom: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      body:hover .nav {
+        opacity: 0.9;
+      }
+      .nav button {
+        font: inherit;
+        font-size: 14px;
+        border: 1px solid #cfd3da;
+        background: #fff;
+        border-radius: 6px;
+        padding: 6px 12px;
+        cursor: pointer;
+      }
+      html:fullscreen,
+      html:fullscreen::backdrop,
+      html:fullscreen body {
+        background: #fff;
+      }
+      html:fullscreen .slide {
+        box-shadow: none;
+      }
+      html:fullscreen .nav {
+        display: none;
+      }
+      @media print {
+        html,
+        body {
+          overflow: visible;
+          background: #fff;
+        }
+        .deck {
+          position: static;
+          transform: none !important;
+          width: auto;
+          height: auto;
+        }
+        .slide {
+          position: relative;
+          display: flex !important;
+          width: 1280px;
+          height: 720px;
+          page-break-after: always;
+          box-shadow: none;
+        }
+        .nav {
+          display: none;
+        }
+        @page {
+          size: 1280px 720px;
+          margin: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="deck" id="deck">
+      <!-- 1. Tiêu đề -->
+      <section class="slide">
+        <div class="fill">
+          <div class="kicker">Báo cáo cuối kì · Xử lý dữ liệu</div>
+          <h1>Bộ nhớ video thời gian thực<br />bằng mạng nơ-ron xung</h1>
+          <p class="muted" style="margin-top: 28px; font-size: 24px">
+            Nâng cấp DMP-SNN, so sánh với Mixer-SNN trên bài toán hỏi đáp về quá
+            khứ của video
+          </p>
+          <div style="margin-top: 56px; font-size: 22px; line-height: 1.7">
+            <div
+              class="muted"
+              style="
+                font-size: 16px;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+              "
+            >
+              Thành viên
+            </div>
+            <div>Đặng Thị Ngọc Thảo</div>
+            <div>Đặng Nguyễn Hữu Huy</div>
+          </div>
+        </div>
+      </section>
 
-<!-- 1. Tiêu đề -->
-<section class="slide">
-  <div class="fill">
-    <div class="kicker">Báo cáo cuối kì · Xử lý dữ liệu</div>
-    <h1>Bộ nhớ video thời gian thực<br>bằng mạng nơ-ron xung</h1>
-    <p class="muted" style="margin-top:28px; font-size:24px">Nâng cấp DMP-SNN, so sánh với Mixer-SNN trên bài toán hỏi đáp về quá khứ của video</p>
-    <div style="margin-top:56px; font-size:22px; line-height:1.7">
-      <div class="muted" style="font-size:16px; letter-spacing:.06em; text-transform:uppercase">Thành viên</div>
-      <div>Đặng Thị Ngọc Thảo</div>
-      <div>Đặng Nguyễn Hữu Huy</div>
+      <!-- 2. Nội dung -->
+      <section class="slide">
+        <h2>Nội dung</h2>
+        <ol class="agenda">
+          <li>Cơ chế và nhược điểm của Mixer-SNN, DMP-SNN</li>
+          <li>Bản nâng cấp DualMemoryPlus</li>
+          <li>Bộ dữ liệu</li>
+          <li>Huấn luyện và bộ mã hóa</li>
+          <li>Kết quả sau cải tiến</li>
+          <li>Demo</li>
+          <li>Hạn chế và hướng phát triển</li>
+        </ol>
+      </section>
+
+      <!-- 3. Bài toán (ngắn) -->
+      <section class="slide" data-sec="Nhược điểm Mixer-SNN, DMP-SNN">
+        <div class="kicker">01 · Nhược điểm</div>
+        <h2>Bài toán dùng để đánh giá</h2>
+        <div class="grid2">
+          <ul>
+            <li>Mô hình xem video 32 giây, từng khung một</li>
+            <li>Bất kỳ lúc nào cũng có thể bị hỏi về quá khứ</li>
+            <li>Không được xem lại khung hình cũ, phải tự nhớ</li>
+            <li>Toàn bộ mô hình là mạng nơ-ron xung</li>
+          </ul>
+          <div class="box">
+            <h3>Ví dụ</h3>
+            <p style="font-size: 21px; color: var(--ink)">
+              “Cách đây 29 giây đang có hoạt động gì?”
+            </p>
+            <p style="margin-top: 10px">
+              Đáp án: Dắt chó đi dạo, bằng chứng là đoạn 0,0–2,9 giây
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. MD-Delay -->
+      <section class="slide" data-sec="Nhược điểm Mixer-SNN, DMP-SNN">
+        <div class="kicker">01 · Mixer-SNN</div>
+        <figure class="theory-figure">
+          <img
+            src="../assets/md-delay-training-inference-pipeline-v11.png"
+            alt="Sơ đồ MD-Delay thể hiện cách các nhánh kết hợp nhiều mốc khi huấn luyện và chọn một mốc mỗi nhánh khi suy luận để tạo K/V."
+          />
+        </figure>
+      </section>
+
+      <!-- 5. Mixer: tau -->
+      <section class="slide" data-sec="Nhược điểm Mixer-SNN, DMP-SNN">
+        <div class="kicker">01 · Nhược điểm Mixer-SNN</div>
+        <h2>Chỉ nhớ bằng điện thế màng của nơ-ron</h2>
+        <div class="grid2">
+          <div>
+            <ul>
+              <li>
+                Không có bộ nhớ riêng, quá khứ chỉ còn trong điện thế màng
+              </li>
+              <li>
+                Hằng số thời gian τ = 2 của bản gốc quên gần như ngay lập tức
+              </li>
+              <li>Tăng τ giữ được lâu hơn nhưng thông tin bị trộn lẫn</li>
+            </ul>
+          </div>
+          <div>
+            <div class="muted" style="font-size: 17px; margin-bottom: 14px">
+              Độ chính xác theo τ (validation)
+            </div>
+            <div class="bars">
+              <span>τ = 2 (gốc)</span>
+              <div class="t"><div class="b" style="width: 23%"></div></div>
+              <span class="v">11,7%</span> <span>τ = 8</span>
+              <div class="t"><div class="b" style="width: 35%"></div></div>
+              <span class="v">17,5%</span> <span>τ = 16</span>
+              <div class="t"><div class="b" style="width: 43%"></div></div>
+              <span class="v">21,4%</span> <span>τ = 24</span>
+              <div class="t"><div class="b a" style="width: 46%"></div></div>
+              <span class="v">23,0%</span> <span>τ = 32</span>
+              <div class="t"><div class="b" style="width: 44%"></div></div>
+              <span class="v">22,1%</span> <span>τ = 64</span>
+              <div class="t"><div class="b" style="width: 37%"></div></div>
+              <span class="v">18,3%</span>
+            </div>
+            <p class="muted" style="font-size: 17px; margin-top: 16px">
+              Đoán bừa: 9,4%
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Mixer: quên -->
+      <section class="slide" data-sec="Nhược điểm Mixer-SNN, DMP-SNN">
+        <div class="kicker">01 · Nhược điểm Mixer-SNN</div>
+        <h2>Quên nhanh theo thời gian</h2>
+        <div class="grid2">
+          <div>
+            <div class="muted" style="font-size: 17px; margin-bottom: 14px">
+              Mixer-SNN tốt nhất, độ chính xác theo độ xa của sự kiện
+            </div>
+            <div class="bars">
+              <span>0–4 giây</span>
+              <div class="t"><div class="b" style="width: 58%"></div></div>
+              <span class="v">58,3%</span> <span>4–8 giây</span>
+              <div class="t"><div class="b" style="width: 52%"></div></div>
+              <span class="v">52,4%</span> <span>8–16 giây</span>
+              <div class="t"><div class="b" style="width: 22%"></div></div>
+              <span class="v">22,0%</span> <span>16–32 giây</span>
+              <div class="t"><div class="b" style="width: 8%"></div></div>
+              <span class="v">7,8%</span>
+            </div>
+          </div>
+          <ul>
+            <li>Nhớ tốt vài giây gần nhất</li>
+            <li>Với sự kiện cách 16–32 giây, độ chính xác còn 7,8%</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 7. DMP: cơ chế -->
+      <section class="slide" data-sec="Nhược điểm Mixer-SNN, DMP-SNN">
+        <div class="kicker">01 · DMP-SNN</div>
+        <figure class="theory-figure">
+          <img
+            src="../assets/dmp-figure1b-dual-path.png"
+            alt="Hình 1b của DMP-SNN. Bên trái là đường xung nhanh và đường nhớ chậm trong thuật toán. Bên phải là thiết kế phần cứng tương ứng."
+          />
+        </figure>
+      </section>
+
+      <!-- 8. DMP: giới hạn đầu vào bộ nhớ -->
+      <section class="slide" data-sec="Nhược điểm Mixer-SNN, DMP-SNN">
+        <div class="kicker">01 · Nhược điểm DMP-SNN</div>
+        <h2>Bộ nhớ chậm chỉ nhận một con số mỗi bước</h2>
+        <div class="grid2">
+          <div>
+            <ul>
+              <li>
+                Mỗi bước, đường nhớ chậm chỉ nhận 1 giá trị đã nén từ tín hiệu
+                đầu vào.
+              </li>
+              <li>
+                Khi nhiều đặc trưng bị gộp vào một giá trị, một số chi tiết giúp
+                phân biệt hoạt động có thể bị mất.
+              </li>
+              <li>Bộ nhớ chỉ có một cửa sổ thời gian để tóm tắt quá khứ.</li>
+            </ul>
+          </div>
+          <div>
+            <div class="muted" style="font-size: 17px; margin-bottom: 14px">
+              Độ chính xác theo kích thước bộ nhớ d (validation)
+            </div>
+            <div class="bars">
+              <span>d = 10</span>
+              <div class="t"><div class="b" style="width: 49%"></div></div>
+              <span class="v">24,4%</span> <span>d = 40</span>
+              <div class="t"><div class="b a" style="width: 54%"></div></div>
+              <span class="v">27,2%</span> <span>d = 80</span>
+              <div class="t"><div class="b" style="width: 45%"></div></div>
+              <span class="v">22,7%</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. Tổng kết nhược điểm -->
+      <section class="slide" data-sec="Nhược điểm Mixer-SNN, DMP-SNN">
+        <div class="kicker">01 · Nhược điểm</div>
+        <h2>Tóm lại</h2>
+        <table>
+          <tr>
+            <th></th>
+            <th>Mixer-SNN</th>
+            <th>DMP-SNN</th>
+          </tr>
+          <tr>
+            <td>Cơ chế nhớ</td>
+            <td>Điện thế màng nơ-ron</td>
+            <td>Bộ nhớ Legendre, đầu vào 1 số</td>
+          </tr>
+          <tr>
+            <td>Nhớ sự kiện 16–32 giây trước</td>
+            <td>7,8%</td>
+            <td>20,0%</td>
+          </tr>
+          <tr>
+            <td>Tốt nhất sau khi dò tham số (test)</td>
+            <td>34,5%</td>
+            <td>28,4%</td>
+          </tr>
+          <tr>
+            <td>Vấn đề chính</td>
+            <td>Quên nhanh</td>
+            <td>Nhớ được nhưng mờ</td>
+          </tr>
+        </table>
+      </section>
+
+      <!-- 10. Nâng cấp: ý tưởng -->
+      <section class="slide" data-sec="Bản nâng cấp DualMemoryPlus">
+        <div class="kicker">02 · Bản nâng cấp</div>
+        <h2>DualMemoryPlus: giữ bộ nhớ Legendre của DMP, sửa 4 điểm</h2>
+        <div class="grid2" style="gap: 24px 40px">
+          <div class="box">
+            <h3>Đầu vào vector</h3>
+            <p>Bộ nhớ nhận 16 kênh thay vì 1 số</p>
+          </div>
+          <div class="box">
+            <h3>Nhiều cửa sổ nhớ</h3>
+            <p>3 cửa sổ 2, 8 và 32 giây: vừa chi tiết gần, vừa nhớ xa</p>
+          </div>
+          <div class="box">
+            <h3>Câu hỏi đọc bộ nhớ</h3>
+            <p>Câu hỏi đọc thẳng vào bộ nhớ qua một lớp nơ-ron xung</p>
+          </div>
+          <div class="box">
+            <h3>Đọc đúng thời điểm</h3>
+            <p>
+              Giải mã bộ nhớ tại đúng thời điểm được hỏi bằng đa thức Legendre
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11. Nâng cấp: kiến trúc -->
+      <section class="slide" data-sec="Bản nâng cấp DualMemoryPlus">
+        <div class="kicker">02 · Bản nâng cấp</div>
+        <h2 style="margin-bottom: 12px">Luồng dữ liệu của DualMemoryPlus</h2>
+        <img
+          src="../assets/dual-memory-plus-pipeline.svg"
+          width="1120"
+          height="462"
+          alt="Khi video chạy, Spiking ResNet18 mã hóa từng khung và hai tầng cập nhật bộ nhớ riêng. Khi có câu hỏi, mô hình đọc trực tiếp bộ nhớ tầng 2 và dùng độ trễ để giải mã bộ nhớ cả hai tầng. Đầu trả lời dùng thông tin đọc được cùng câu hỏi và tỉ lệ xung gần nhất."
+        />
+      </section>
+
+      <!-- 12. Dữ liệu: nguồn -->
+      <section class="slide" data-sec="Bộ dữ liệu">
+        <div class="kicker">03 · Bộ dữ liệu</div>
+        <h2>UCF101: 24 hoạt động, video thật</h2>
+        <div class="grid2">
+          <ul>
+            <li>
+              3.255 clip của 24 hoạt động dễ phân biệt: thể thao, âm nhạc, sinh
+              hoạt
+            </li>
+            <li>
+              Chia theo nhóm gốc của UCF101: clip cắt từ cùng một video không bị
+              chia ra hai tập
+            </li>
+          </ul>
+          <table>
+            <tr>
+              <th>Tập</th>
+              <th>Nhóm</th>
+              <th class="r">Số clip</th>
+            </tr>
+            <tr>
+              <td>Train</td>
+              <td>g11–g25</td>
+              <td class="r">1.939</td>
+            </tr>
+            <tr>
+              <td>Validation</td>
+              <td>g08–g10</td>
+              <td class="r">398</td>
+            </tr>
+            <tr>
+              <td>Test</td>
+              <td>g01–g07</td>
+              <td class="r">918</td>
+            </tr>
+          </table>
+        </div>
+      </section>
+
+      <!-- 13. Dữ liệu: luồng -->
+      <section class="slide" data-sec="Bộ dữ liệu">
+        <div class="kicker">03 · Bộ dữ liệu</div>
+        <h2>Ghép clip thành luồng video 32 giây</h2>
+        <div class="timeline" style="margin: 10px 0 12px">
+          <div style="flex: 23; background: #64748b">Dắt chó</div>
+          <div style="flex: 17; background: #94a3b8">Bóng rổ</div>
+          <div style="flex: 39; background: #2563eb">Bóng bàn</div>
+          <div style="flex: 23; background: #475569">Đánh trống</div>
+          <div style="flex: 45; background: #60a5fa">Thái cực quyền</div>
+          <div style="flex: 48; background: #64748b">Dắt chó</div>
+          <div style="flex: 43; background: #1d4ed8">Kayak</div>
+          <div style="flex: 18; background: #94a3b8">Nhảy dù</div>
+        </div>
+        <div
+          class="muted"
+          style="
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+            margin-bottom: 36px;
+          "
+        >
+          <span>0 s</span><span>16 s</span><span>32 s</span>
+        </div>
+        <ul>
+          <li>8 khung hình/giây, mỗi hoạt động dài ngẫu nhiên 2–8 giây</li>
+          <li>Hoạt động có thể lặp lại, hai đoạn liền nhau luôn khác nhau</li>
+          <li>Mỗi lần train sinh luồng mới, nên số luồng không giới hạn</li>
+        </ul>
+      </section>
+
+      <!-- 14. Dữ liệu: câu hỏi -->
+      <section class="slide" data-sec="Bộ dữ liệu">
+        <div class="kicker">03 · Bộ dữ liệu</div>
+        <h2>4 loại câu hỏi, luôn có đáp án và bằng chứng</h2>
+        <table>
+          <tr>
+            <th>Câu hỏi</th>
+            <th>Đáp án</th>
+            <th class="r">Đoán bừa</th>
+          </tr>
+          <tr>
+            <td>Cách đây N giây đang có hoạt động gì?</td>
+            <td>1 trong 24</td>
+            <td class="r">4,2%</td>
+          </tr>
+          <tr>
+            <td>Ở giây thứ T đang xảy ra hoạt động gì?</td>
+            <td>1 trong 24</td>
+            <td class="r">4,2%</td>
+          </tr>
+          <tr>
+            <td>Trong 4 hoạt động này, hoạt động nào đã xuất hiện?</td>
+            <td>1 trong 4</td>
+            <td class="r">25%</td>
+          </tr>
+          <tr>
+            <td>Ngay sau lần gần nhất có X là hoạt động gì?</td>
+            <td>1 trong 24</td>
+            <td class="r">4,2%</td>
+          </tr>
+        </table>
+        <p class="muted" style="margin-top: 26px; font-size: 20px">
+          Bằng chứng luôn nằm trong đoạn đã kết thúc, nên không thể trả lời bằng
+          cách nhìn khung hình hiện tại.
+        </p>
+      </section>
+
+      <!-- 15. Huấn luyện: quy trình -->
+      <section class="slide" data-sec="Huấn luyện và bộ mã hóa">
+        <div class="kicker">04 · Huấn luyện</div>
+        <h2>Hai giai đoạn, so sánh công bằng</h2>
+        <div class="flow" style="margin-bottom: 40px">
+          <div class="step">
+            <b>1. Bộ mã hóa</b>nhận diện hoạt động trong từng giây video
+          </div>
+          <span class="arrow">→</span>
+          <div class="step"><b>Đặc trưng xung</b>tính một lần cho mọi clip</div>
+          <span class="arrow">→</span>
+          <div class="step a"><b>2. Bộ nhớ</b>Mixer · DMP · Nâng cấp</div>
+        </div>
+        <div class="grid2">
+          <ul>
+            <li>Cùng đặc trưng, dữ liệu, đầu hỏi đáp, số bước cập nhật</li>
+            <li>
+              Dò tham số tốt nhất cho từng mô hình: τ của Mixer, d của DMP
+            </li>
+            <li>Kích thước tương đương, khoảng 0,8 triệu tham số</li>
+          </ul>
+          <ul>
+            <li>
+              Chọn mô hình theo validation, chấm test một lần trên 2.048 luồng
+            </li>
+            <li>Train trên GPU của Modal (T4, L4)</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 16. Bộ mã hóa small -->
+      <section class="slide" data-sec="Huấn luyện và bộ mã hóa">
+        <div class="kicker">04 · Bộ mã hóa small</div>
+        <h2>Lần 1: bộ mã hóa sMLPNet small của Mixer-SNN</h2>
+        <div class="grid2">
+          <div>
+            <div class="muted" style="font-size: 17px; margin-bottom: 14px">
+              Test, trung bình 3 seed
+            </div>
+            <div class="bars">
+              <span>Nâng cấp</span>
+              <div class="t"><div class="b a" style="width: 66%"></div></div>
+              <span class="v">43,8%</span> <span>Mixer-SNN</span>
+              <div class="t"><div class="b" style="width: 43%"></div></div>
+              <span class="v">28,8%</span> <span>DMP-SNN</span>
+              <div class="t"><div class="b" style="width: 36%"></div></div>
+              <span class="v">23,9%</span>
+            </div>
+          </div>
+          <ul>
+            <li>Bộ mã hóa chỉ nhận đúng 61,6% clip</li>
+            <li>Kể cả nhớ hoàn hảo cũng chỉ đạt tối đa 58,8%</li>
+            <li>→ Bộ mã hóa là nút thắt, cần đổi</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 17. Đổi bộ mã hóa -->
+      <section class="slide" data-sec="Huấn luyện và bộ mã hóa">
+        <div class="kicker">04 · Đổi bộ mã hóa</div>
+        <h2>Lần 2: Spiking ResNet18</h2>
+        <div class="grid3" style="margin-bottom: 40px">
+          <div>
+            <div class="big gray">61,6% → 74,6%</div>
+            <div class="cap">nhận đúng clip</div>
+          </div>
+          <div>
+            <div class="big gray">58,8% → 74,7%</div>
+            <div class="cap">mức trần với bộ nhớ hoàn hảo</div>
+          </div>
+          <div></div>
+        </div>
+        <ul>
+          <li>Khởi tạo từ ImageNet, nơ-ron xung IF, ảnh 112×112</li>
+          <li>Đặt lại trạng thái nơ-ron mỗi 8 khung, khớp với lúc train</li>
+        </ul>
+      </section>
+
+      <!-- 18. So sánh small và ResNet18 -->
+      <section class="slide" data-sec="Huấn luyện và bộ mã hóa">
+        <div class="kicker">04 · Đổi bộ mã hóa</div>
+        <h2>Mô hình nào hưởng lợi nhiều nhất</h2>
+        <table>
+          <tr>
+            <th>Mô hình</th>
+            <th class="r">Small</th>
+            <th class="r">Spiking ResNet18</th>
+            <th class="r">Tăng</th>
+          </tr>
+          <tr class="hl">
+            <td>Nâng cấp</td>
+            <td class="r">43,8%</td>
+            <td class="r">56,6%</td>
+            <td class="r">+12,8</td>
+          </tr>
+          <tr>
+            <td>Mixer-SNN</td>
+            <td class="r">28,8%</td>
+            <td class="r">33,9%</td>
+            <td class="r">+5,1</td>
+          </tr>
+          <tr>
+            <td>DMP-SNN</td>
+            <td class="r">23,9%</td>
+            <td class="r">26,1%</td>
+            <td class="r">+2,2</td>
+          </tr>
+        </table>
+        <p class="muted" style="margin-top: 28px; font-size: 20px">
+          Test. Với Spiking ResNet18: 60 epoch, câu hỏi có thêm đồng hồ hiện
+          tại, áp dụng cho cả ba.
+        </p>
+      </section>
+
+      <!-- 19. Kết quả cuối -->
+      <section class="slide" data-sec="Kết quả sau cải tiến">
+        <div class="kicker">05 · Kết quả</div>
+        <h2>Kết quả cuối cùng</h2>
+        <table>
+          <tr>
+            <th>Mô hình</th>
+            <th class="r">Tham số</th>
+            <th class="r">Validation</th>
+            <th class="r">Test</th>
+          </tr>
+          <tr class="hl">
+            <td>Nâng cấp (DualMemoryPlus)</td>
+            <td class="r">0,83M</td>
+            <td class="r">63,7%</td>
+            <td class="r">61,6%</td>
+          </tr>
+          <tr>
+            <td>Nâng cấp, nén hạng 64</td>
+            <td class="r">0,55M</td>
+            <td class="r">63,7%</td>
+            <td class="r">61,2%</td>
+          </tr>
+          <tr>
+            <td>CNN tốt nhất</td>
+            <td class="r">2,85M</td>
+            <td class="r">64,1%</td>
+            <td class="r">61,5%</td>
+          </tr>
+          <tr>
+            <td>Mixer-SNN</td>
+            <td class="r">0,82M</td>
+            <td class="r">37,4%</td>
+            <td class="r">34,5%</td>
+          </tr>
+          <tr>
+            <td>DMP-SNN</td>
+            <td class="r">0,34M</td>
+            <td class="r">31,7%</td>
+            <td class="r">28,4%</td>
+          </tr>
+        </table>
+        <p class="muted" style="margin-top: 28px; font-size: 20px">
+          Đoán bừa 9,4% · Mức trần của bộ mã hóa 74,7%
+        </p>
+      </section>
+
+      <!-- 20. Theo loại câu hỏi -->
+      <section class="slide" data-sec="Kết quả sau cải tiến">
+        <div class="kicker">05 · Kết quả</div>
+        <h2>Theo loại câu hỏi</h2>
+        <div class="legend">
+          <span><i style="background: var(--accent)"></i>Nâng cấp</span
+          ><span><i style="background: var(--gray)"></i>Mixer-SNN</span
+          ><span><i style="background: #d1d5db"></i>DMP-SNN</span>
+        </div>
+        <div class="grid2" style="gap: 30px 56px">
+          <div>
+            <b style="font-size: 20px">Cách đây N giây</b>
+            <div
+              class="bars"
+              style="grid-template-columns: 0 1fr 74px; margin-top: 10px"
+            >
+              <span></span>
+              <div class="t"><div class="b a" style="width: 65.6%"></div></div>
+              <span class="v">65,6%</span> <span></span>
+              <div class="t"><div class="b" style="width: 17.6%"></div></div>
+              <span class="v">17,6%</span> <span></span>
+              <div class="t">
+                <div class="b" style="width: 20.5%; background: #d1d5db"></div>
+              </div>
+              <span class="v">20,5%</span>
+            </div>
+          </div>
+          <div>
+            <b style="font-size: 20px">Ở giây thứ T</b>
+            <div
+              class="bars"
+              style="grid-template-columns: 0 1fr 74px; margin-top: 10px"
+            >
+              <span></span>
+              <div class="t"><div class="b a" style="width: 69%"></div></div>
+              <span class="v">69,0%</span> <span></span>
+              <div class="t"><div class="b" style="width: 28.1%"></div></div>
+              <span class="v">28,1%</span> <span></span>
+              <div class="t">
+                <div class="b" style="width: 24.2%; background: #d1d5db"></div>
+              </div>
+              <span class="v">24,2%</span>
+            </div>
+          </div>
+          <div>
+            <b style="font-size: 20px">Đã xuất hiện (4 lựa chọn)</b>
+            <div
+              class="bars"
+              style="grid-template-columns: 0 1fr 74px; margin-top: 10px"
+            >
+              <span></span>
+              <div class="t"><div class="b a" style="width: 73.3%"></div></div>
+              <span class="v">73,3%</span> <span></span>
+              <div class="t"><div class="b" style="width: 61.2%"></div></div>
+              <span class="v">61,2%</span> <span></span>
+              <div class="t">
+                <div class="b" style="width: 49.8%; background: #d1d5db"></div>
+              </div>
+              <span class="v">49,8%</span>
+            </div>
+          </div>
+          <div>
+            <b style="font-size: 20px">Ngay sau X</b>
+            <div
+              class="bars"
+              style="grid-template-columns: 0 1fr 74px; margin-top: 10px"
+            >
+              <span></span>
+              <div class="t"><div class="b a" style="width: 38.6%"></div></div>
+              <span class="v">38,6%</span> <span></span>
+              <div class="t"><div class="b" style="width: 31.3%"></div></div>
+              <span class="v">31,3%</span> <span></span>
+              <div class="t">
+                <div class="b" style="width: 19.2%; background: #d1d5db"></div>
+              </div>
+              <span class="v">19,2%</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 21. Theo độ xa -->
+      <section class="slide" data-sec="Kết quả sau cải tiến">
+        <div class="kicker">05 · Kết quả</div>
+        <h2>Nhớ xa không bị giảm</h2>
+        <table>
+          <tr>
+            <th>Sự kiện cách đây</th>
+            <th class="r">0–4 giây</th>
+            <th class="r">4–8 giây</th>
+            <th class="r">8–16 giây</th>
+            <th class="r">16–32 giây</th>
+          </tr>
+          <tr class="hl">
+            <td>Nâng cấp</td>
+            <td class="r">62,1%</td>
+            <td class="r">65,4%</td>
+            <td class="r">60,2%</td>
+            <td class="r">63,0%</td>
+          </tr>
+          <tr>
+            <td>Mixer-SNN</td>
+            <td class="r">58,3%</td>
+            <td class="r">52,4%</td>
+            <td class="r">22,0%</td>
+            <td class="r">7,8%</td>
+          </tr>
+          <tr>
+            <td>DMP-SNN</td>
+            <td class="r">34,8%</td>
+            <td class="r">34,0%</td>
+            <td class="r">26,9%</td>
+            <td class="r">20,0%</td>
+          </tr>
+        </table>
+      </section>
+
+      <!-- 22. Giảm tham số -->
+      <section class="slide" data-sec="Kết quả sau cải tiến">
+        <div class="kicker">05 · Kết quả</div>
+        <h2>Giảm 34% tham số, độ chính xác gần như giữ nguyên</h2>
+        <div class="grid2" style="grid-template-columns: 1.3fr 1fr">
+          <table>
+            <tr>
+              <th></th>
+              <th class="r">Bản gốc</th>
+              <th class="r">Nén hạng 64</th>
+            </tr>
+            <tr>
+              <td>Tham số</td>
+              <td class="r">831.544</td>
+              <td class="r"><b>551.992</b></td>
+            </tr>
+            <tr>
+              <td>Validation</td>
+              <td class="r">63,73%</td>
+              <td class="r">63,68%</td>
+            </tr>
+            <tr>
+              <td>Test</td>
+              <td class="r">61,64%</td>
+              <td class="r">61,17%</td>
+            </tr>
+            <tr>
+              <td>Sự kiện 16–32 giây</td>
+              <td class="r">62,99%</td>
+              <td class="r">62,94%</td>
+            </tr>
+            <tr>
+              <td>Kích thước file</td>
+              <td class="r">3,53 MB</td>
+              <td class="r"><b>2,41 MB</b></td>
+            </tr>
+          </table>
+          <ul>
+            <li>
+              Tách các ma trận chiếu lớn thành 2 ma trận nhỏ hạng 64 bằng SVD
+            </li>
+            <li>Không cần train lại</li>
+            <li>Test chỉ giảm 0,47 điểm</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 23. So với CNN -->
+      <section class="slide" data-sec="Kết quả sau cải tiến">
+        <div class="kicker">05 · Kết quả</div>
+        <h2>So với mạng tích chập thường (CNN)</h2>
+        <table>
+          <tr>
+            <th>Mô hình</th>
+            <th class="r">Tham số</th>
+            <th class="r">Bộ nhớ trạng thái</th>
+            <th class="r">Sự kiện 16–32 giây</th>
+            <th class="r">Test</th>
+          </tr>
+          <tr>
+            <td>CNN 192 kênh</td>
+            <td class="r">0,79M</td>
+            <td class="r">–</td>
+            <td class="r">38,6%</td>
+            <td class="r">48,8%</td>
+          </tr>
+          <tr>
+            <td>CNN 384 kênh</td>
+            <td class="r">2,71M</td>
+            <td class="r">–</td>
+            <td class="r">39,6%</td>
+            <td class="r">47,9%</td>
+          </tr>
+          <tr>
+            <td>CNN 512 kênh</td>
+            <td class="r">4,64M</td>
+            <td class="r">–</td>
+            <td class="r">37,0%</td>
+            <td class="r">47,4%</td>
+          </tr>
+          <tr>
+            <td>CNN 384 kênh + bộ đệm toàn bộ quá khứ</td>
+            <td class="r">2,85M</td>
+            <td class="r">16.384 số</td>
+            <td class="r">63,6%</td>
+            <td class="r">61,5%</td>
+          </tr>
+          <tr class="hl">
+            <td>Nâng cấp (SNN)</td>
+            <td class="r">0,83M</td>
+            <td class="r">960 số</td>
+            <td class="r">63,0%</td>
+            <td class="r">61,6%</td>
+          </tr>
+          <tr class="hl">
+            <td>Nâng cấp, nén hạng 64</td>
+            <td class="r">0,55M</td>
+            <td class="r">960 số</td>
+            <td class="r">62,9%</td>
+            <td class="r">61,2%</td>
+          </tr>
+        </table>
+        <ul style="margin-top: 24px">
+          <li>
+            CNN to hơn không tốt hơn: cần cấu trúc nhớ chứ không cần nhiều tham
+            số
+          </li>
+          <li>
+            SNN ngang CNN tốt nhất với <b>ít hơn 3,4–5,2 lần tham số</b>, bộ nhớ
+            nhỏ hơn 17 lần, chỉ truyền xung
+          </li>
+        </ul>
+      </section>
+
+      <!-- 24. Demo -->
+      <section class="slide" data-sec="Demo">
+        <div class="kicker">06 · Demo</div>
+        <h2>Hỏi đáp trực tiếp trên video thật</h2>
+        <div class="grid2" style="grid-template-columns: 1.15fr 1fr">
+          <div class="mock">
+            <div style="grid-row: span 2">
+              Video đang phát<br />và dòng thời gian
+            </div>
+            <div>Chọn loại câu hỏi,<br />N, T hoặc X</div>
+            <div>Đáp án đúng, bằng chứng<br />và câu trả lời của 3 mô hình</div>
+          </div>
+          <ul>
+            <li>40 luồng test chưa từng thấy khi train</li>
+            <li>Dừng bất kỳ lúc nào và đặt câu hỏi</li>
+            <li>
+              So sánh 3 mô hình cùng lúc: đáp án, độ tin cậy, thời gian chạy
+            </li>
+            <li>
+              Khung hình sau thời điểm hỏi bị xóa trước khi đưa vào mô hình
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 25. Vì sao 61% -->
+      <section class="slide" data-sec="Hạn chế và hướng phát triển">
+        <div class="kicker">07 · Hạn chế</div>
+        <h2>Vì sao mới đạt 61,6%</h2>
+        <div class="grid2">
+          <div>
+            <div class="bars" style="grid-template-columns: 230px 1fr 74px">
+              <span>Đoán bừa</span>
+              <div class="t"><div class="b" style="width: 9.4%"></div></div>
+              <span class="v">9,4%</span> <span>Nâng cấp</span>
+              <div class="t"><div class="b a" style="width: 61.6%"></div></div>
+              <span class="v">61,6%</span> <span>Trần của bộ mã hóa</span>
+              <div class="t"><div class="b" style="width: 74.7%"></div></div>
+              <span class="v">74,7%</span>
+            </div>
+            <p class="muted" style="font-size: 19px; margin-top: 20px">
+              Đã đạt 82% mức trần
+            </p>
+          </div>
+          <ul>
+            <li>Bộ mã hóa chỉ nhận đúng khoảng 3/4 số clip</li>
+            <li>
+              Câu “ngay sau X” mới đạt 38,6%: cần nhớ thứ tự các sự kiện, bộ nhớ
+              hiện tại chỉ nhớ theo thời gian
+            </li>
+            <li>Mỗi cấu hình mới chạy 1 seed do giới hạn GPU</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 26. Hướng phát triển -->
+      <section class="slide" data-sec="Hạn chế và hướng phát triển">
+        <div class="kicker">07 · Hướng phát triển</div>
+        <h2>Hướng phát triển</h2>
+        <div class="grid2" style="gap: 24px 40px">
+          <div class="box">
+            <h3>Bộ mã hóa tốt hơn</h3>
+            <p>
+              Thêm kênh chuyển động giống camera sự kiện, mạng lớn hơn, cửa sổ
+              dài hơn để nâng mức trần
+            </p>
+          </div>
+          <div class="box">
+            <h3>Bộ nhớ theo sự kiện</h3>
+            <p>Ghi lại mỗi lần hoạt động thay đổi để trả lời “ngay sau X”</p>
+          </div>
+          <div class="box">
+            <h3>Mã hóa trực tiếp</h3>
+            <p>Nhận video bất kỳ từ camera hoặc file tải lên</p>
+          </div>
+          <div class="box">
+            <h3>Phần cứng neuromorphic</h3>
+            <p>Đưa lên chip nơ-ron xung để tiết kiệm năng lượng</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 27. Cảm ơn -->
+      <section class="slide">
+        <div class="fill" style="align-items: flex-start">
+          <h1 style="font-size: 72px">
+            Cảm ơn thầy cô<br />và các bạn đã lắng nghe
+          </h1>
+          <p class="muted" style="margin-top: 30px; font-size: 24px">
+            Đặng Thị Ngọc Thảo · Đặng Nguyễn Hữu Huy
+          </p>
+        </div>
+      </section>
     </div>
-  </div>
-</section>
-
-<!-- 2. Nội dung -->
-<section class="slide">
-  <h2>Nội dung</h2>
-  <ol class="agenda">
-    <li>Nhược điểm của Mixer-SNN và DMP-SNN</li>
-    <li>Bản nâng cấp DualMemoryPlus</li>
-    <li>Bộ dữ liệu</li>
-    <li>Huấn luyện và bộ mã hóa</li>
-    <li>Kết quả sau cải tiến</li>
-    <li>Demo</li>
-    <li>Hạn chế và hướng phát triển</li>
-  </ol>
-</section>
-
-<!-- 3. Bài toán (ngắn) -->
-<section class="slide" data-sec="Nhược điểm Mixer-SNN, DMP-SNN">
-  <div class="kicker">01 · Nhược điểm</div>
-  <h2>Bài toán dùng để đánh giá</h2>
-  <div class="grid2">
-    <ul>
-      <li>Mô hình xem video 32 giây, từng khung một</li>
-      <li>Bất kỳ lúc nào cũng có thể bị hỏi về quá khứ</li>
-      <li>Không được xem lại khung hình cũ, phải tự nhớ</li>
-      <li>Toàn bộ mô hình là mạng nơ-ron xung</li>
-    </ul>
-    <div class="box">
-      <h3>Ví dụ</h3>
-      <p style="font-size:21px; color:var(--ink)">“Cách đây 29 giây đang có hoạt động gì?”</p>
-      <p style="margin-top:10px">Đáp án: Dắt chó đi dạo, bằng chứng là đoạn 0,0–2,9 giây</p>
+    <div class="nav">
+      <button id="prev">←</button><button id="full">Toàn màn hình</button
+      ><button id="next">→</button>
     </div>
-  </div>
-</section>
-
-<!-- 4. Mixer: tau -->
-<section class="slide" data-sec="Nhược điểm Mixer-SNN, DMP-SNN">
-  <div class="kicker">01 · Nhược điểm Mixer-SNN</div>
-  <h2>Chỉ nhớ bằng điện thế màng của nơ-ron</h2>
-  <div class="grid2">
-    <div>
-      <ul>
-        <li>Không có bộ nhớ riêng, quá khứ chỉ còn trong điện thế màng</li>
-        <li>Hằng số thời gian τ = 2 của bản gốc quên gần như ngay lập tức</li>
-        <li>Tăng τ giữ được lâu hơn nhưng thông tin bị trộn lẫn</li>
-      </ul>
-    </div>
-    <div>
-      <div class="muted" style="font-size:17px; margin-bottom:14px">Độ chính xác theo τ (validation)</div>
-      <div class="bars">
-        <span>τ = 2 (gốc)</span><div class="t"><div class="b" style="width:23%"></div></div><span class="v">11,7%</span>
-        <span>τ = 8</span><div class="t"><div class="b" style="width:35%"></div></div><span class="v">17,5%</span>
-        <span>τ = 16</span><div class="t"><div class="b" style="width:43%"></div></div><span class="v">21,4%</span>
-        <span>τ = 24</span><div class="t"><div class="b a" style="width:46%"></div></div><span class="v">23,0%</span>
-        <span>τ = 32</span><div class="t"><div class="b" style="width:44%"></div></div><span class="v">22,1%</span>
-        <span>τ = 64</span><div class="t"><div class="b" style="width:37%"></div></div><span class="v">18,3%</span>
-      </div>
-      <p class="muted" style="font-size:17px; margin-top:16px">Đoán bừa: 9,4%</p>
-    </div>
-  </div>
-</section>
-
-<!-- 5. Mixer: quên -->
-<section class="slide" data-sec="Nhược điểm Mixer-SNN, DMP-SNN">
-  <div class="kicker">01 · Nhược điểm Mixer-SNN</div>
-  <h2>Quên nhanh theo thời gian</h2>
-  <div class="grid2">
-    <div>
-      <div class="muted" style="font-size:17px; margin-bottom:14px">Mixer-SNN tốt nhất, độ chính xác theo độ xa của sự kiện</div>
-      <div class="bars">
-        <span>0–4 giây</span><div class="t"><div class="b" style="width:58%"></div></div><span class="v">58,3%</span>
-        <span>4–8 giây</span><div class="t"><div class="b" style="width:52%"></div></div><span class="v">52,4%</span>
-        <span>8–16 giây</span><div class="t"><div class="b" style="width:22%"></div></div><span class="v">22,0%</span>
-        <span>16–32 giây</span><div class="t"><div class="b" style="width:8%"></div></div><span class="v">7,8%</span>
-      </div>
-    </div>
-    <ul>
-      <li>Nhớ tốt vài giây gần nhất</li>
-      <li>Sau 16 giây còn dưới mức đoán bừa</li>
-      <li>Khi được đọc thẳng bộ nhớ, lớp trên cùng ngừng phát xung (0%): mô hình chỉ còn dựa vào điện thế màng</li>
-    </ul>
-  </div>
-</section>
-
-<!-- 6. DMP -->
-<section class="slide" data-sec="Nhược điểm Mixer-SNN, DMP-SNN">
-  <div class="kicker">01 · Nhược điểm DMP-SNN</div>
-  <h2>Bộ nhớ chậm chỉ nhận một con số mỗi bước</h2>
-  <div class="grid2">
-    <div>
-      <ul>
-        <li>Mỗi khung hình được nén thành 1 số trước khi vào bộ nhớ Legendre</li>
-        <li>Video nhiều thông tin, một số không đủ phân biệt 24 hoạt động</li>
-        <li>Tăng kích thước bộ nhớ d không giúp, vì nút thắt nằm ở đầu vào</li>
-        <li>Một cửa sổ nhớ duy nhất</li>
-      </ul>
-    </div>
-    <div>
-      <div class="muted" style="font-size:17px; margin-bottom:14px">Độ chính xác theo kích thước bộ nhớ d (validation)</div>
-      <div class="bars">
-        <span>d = 10</span><div class="t"><div class="b" style="width:49%"></div></div><span class="v">24,4%</span>
-        <span>d = 40</span><div class="t"><div class="b a" style="width:54%"></div></div><span class="v">27,2%</span>
-        <span>d = 80</span><div class="t"><div class="b" style="width:45%"></div></div><span class="v">22,7%</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 7. Tổng kết nhược điểm -->
-<section class="slide" data-sec="Nhược điểm Mixer-SNN, DMP-SNN">
-  <div class="kicker">01 · Nhược điểm</div>
-  <h2>Tóm lại</h2>
-  <table>
-    <tr><th></th><th>Mixer-SNN</th><th>DMP-SNN</th></tr>
-    <tr><td>Cơ chế nhớ</td><td>Điện thế màng nơ-ron</td><td>Bộ nhớ Legendre, đầu vào 1 số</td></tr>
-    <tr><td>Nhớ sự kiện 16–32 giây trước</td><td>7,8%</td><td>20,0%</td></tr>
-    <tr><td>Tốt nhất sau khi dò tham số (test)</td><td>34,5%</td><td>28,4%</td></tr>
-    <tr><td>Vấn đề chính</td><td>Quên nhanh</td><td>Nhớ được nhưng mờ</td></tr>
-  </table>
-</section>
-
-<!-- 8. Nâng cấp: ý tưởng -->
-<section class="slide" data-sec="Bản nâng cấp DualMemoryPlus">
-  <div class="kicker">02 · Bản nâng cấp</div>
-  <h2>DualMemoryPlus: giữ bộ nhớ Legendre của DMP, sửa 4 điểm</h2>
-  <div class="grid2" style="gap:24px 40px">
-    <div class="box"><h3>H1 · Đầu vào vector</h3><p>Bộ nhớ nhận 16 kênh thay vì 1 số</p></div>
-    <div class="box"><h3>H2 · Nhiều cửa sổ nhớ</h3><p>3 cửa sổ 2, 8 và 32 giây: vừa chi tiết gần, vừa nhớ xa</p></div>
-    <div class="box"><h3>H3 · Câu hỏi đọc bộ nhớ</h3><p>Câu hỏi đọc thẳng vào bộ nhớ qua một lớp nơ-ron xung</p></div>
-    <div class="box"><h3>H4 · Đọc đúng thời điểm</h3><p>Giải mã bộ nhớ tại đúng thời điểm được hỏi bằng đa thức Legendre</p></div>
-  </div>
-</section>
-
-<!-- 9. Nâng cấp: kiến trúc -->
-<section class="slide" data-sec="Bản nâng cấp DualMemoryPlus">
-  <div class="kicker">02 · Bản nâng cấp</div>
-  <h2>Kiến trúc</h2>
-  <div class="fill" style="justify-content:flex-start; gap:34px">
-    <div class="flow">
-      <div class="step"><b>Khung hình</b>8 khung/giây</div><span class="arrow">→</span>
-      <div class="step"><b>Bộ mã hóa</b>Spiking ResNet18</div><span class="arrow">→</span>
-      <div class="step a"><b>Tầng nhớ 1</b>16 kênh<br>3 cửa sổ</div><span class="arrow">→</span>
-      <div class="step a"><b>Tầng nhớ 2</b>16 kênh<br>3 cửa sổ</div><span class="arrow">→</span>
-      <div class="step"><b>Đầu hỏi đáp</b>nơ-ron xung</div>
-    </div>
-    <div class="flow" style="padding: 0 0 0 calc(40% + 30px)">
-      <div class="step a" style="flex:none; width:100%"><b>Câu hỏi dạng xung</b>loại câu, N giây, giây T, hoạt động X, đồng hồ hiện tại → đọc bộ nhớ (H3, H4)</div>
-    </div>
-    <ul>
-      <li>Mọi tín hiệu giữa các nơ-ron đều là xung</li>
-      <li>Mô hình chỉ thấy khung hình đến thời điểm được hỏi</li>
-    </ul>
-  </div>
-</section>
-
-<!-- 10. Nâng cấp: từng phần đóng góp -->
-<section class="slide" data-sec="Bản nâng cấp DualMemoryPlus">
-  <div class="kicker">02 · Bản nâng cấp</div>
-  <h2>Mỗi thay đổi đóng góp bao nhiêu</h2>
-  <div class="grid2">
-    <div>
-      <div class="muted" style="font-size:17px; margin-bottom:14px">Bộ mã hóa small (test, 3 seed)</div>
-      <div class="bars">
-        <span>DMP gốc</span><div class="t"><div class="b" style="width:36%"></div></div><span class="v">23,9%</span>
-        <span>+ H1, H2</span><div class="t"><div class="b a" style="width:49%"></div></div><span class="v">32,6%</span>
-        <span>+ H3</span><div class="t"><div class="b a" style="width:66%"></div></div><span class="v">43,8%</span>
-      </div>
-    </div>
-    <div>
-      <div class="muted" style="font-size:17px; margin-bottom:14px">Bộ mã hóa Spiking ResNet18 (test)</div>
-      <div class="bars">
-        <span>H1–H3</span><div class="t"><div class="b a" style="width:85%"></div></div><span class="v">56,6%</span>
-        <span>+ hỏi tương đối</span><div class="t"><div class="b a" style="width:92%"></div></div><span class="v">61,2%</span>
-        <span>+ H4</span><div class="t"><div class="b a" style="width:93%"></div></div><span class="v">61,6%</span>
-        <span>Tắt bộ nhớ</span><div class="t"><div class="b" style="width:14%"></div></div><span class="v">9,6%</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 11. Ưu điểm -->
-<section class="slide" data-sec="Bản nâng cấp DualMemoryPlus">
-  <div class="kicker">02 · Bản nâng cấp</div>
-  <h2>Ưu điểm vượt trội</h2>
-  <div class="grid3" style="margin-top:20px">
-    <div><div class="big">1,79×</div><div class="cap">độ chính xác so với Mixer-SNN</div></div>
-    <div><div class="big">2,17×</div><div class="cap">độ chính xác so với DMP-SNN</div></div>
-    <div><div class="big">63,0%</div><div class="cap">vẫn nhớ sự kiện 16–32 giây trước, Mixer chỉ còn 7,8%</div></div>
-  </div>
-  <div class="grid3" style="margin-top:56px">
-    <div><div class="big gray">0,55M</div><div class="cap">tham số sau khi nén, độ chính xác giữ 61,2%</div></div>
-    <div><div class="big gray">960</div><div class="cap">số trong bộ nhớ, cố định dù video dài bao lâu</div></div>
-    <div><div class="big gray">~40 ms</div><div class="cap">trả lời một câu hỏi trên CPU</div></div>
-  </div>
-</section>
-
-<!-- 12. Dữ liệu: nguồn -->
-<section class="slide" data-sec="Bộ dữ liệu">
-  <div class="kicker">03 · Bộ dữ liệu</div>
-  <h2>UCF101: 24 hoạt động, video thật</h2>
-  <div class="grid2">
-    <ul>
-      <li>3.255 clip của 24 hoạt động dễ phân biệt: thể thao, âm nhạc, sinh hoạt</li>
-      <li>Chia theo nhóm gốc của UCF101: clip cắt từ cùng một video không bị chia ra hai tập</li>
-    </ul>
-    <table>
-      <tr><th>Tập</th><th>Nhóm</th><th class="r">Số clip</th></tr>
-      <tr><td>Train</td><td>g11–g25</td><td class="r">1.939</td></tr>
-      <tr><td>Validation</td><td>g08–g10</td><td class="r">398</td></tr>
-      <tr><td>Test</td><td>g01–g07</td><td class="r">918</td></tr>
-    </table>
-  </div>
-</section>
-
-<!-- 13. Dữ liệu: luồng -->
-<section class="slide" data-sec="Bộ dữ liệu">
-  <div class="kicker">03 · Bộ dữ liệu</div>
-  <h2>Ghép clip thành luồng video 32 giây</h2>
-  <div class="timeline" style="margin: 10px 0 12px">
-    <div style="flex:23; background:#64748b">Dắt chó</div>
-    <div style="flex:17; background:#94a3b8">Bóng rổ</div>
-    <div style="flex:39; background:#2563eb">Bóng bàn</div>
-    <div style="flex:23; background:#475569">Đánh trống</div>
-    <div style="flex:45; background:#60a5fa">Thái cực quyền</div>
-    <div style="flex:48; background:#64748b">Dắt chó</div>
-    <div style="flex:43; background:#1d4ed8">Kayak</div>
-    <div style="flex:18; background:#94a3b8">Nhảy dù</div>
-  </div>
-  <div class="muted" style="display:flex; justify-content:space-between; font-size:15px; margin-bottom:36px"><span>0 s</span><span>16 s</span><span>32 s</span></div>
-  <ul>
-    <li>8 khung hình/giây, mỗi hoạt động dài ngẫu nhiên 2–8 giây</li>
-    <li>Hoạt động có thể lặp lại, hai đoạn liền nhau luôn khác nhau</li>
-    <li>Mỗi lần train sinh luồng mới, nên số luồng không giới hạn</li>
-  </ul>
-</section>
-
-<!-- 14. Dữ liệu: câu hỏi -->
-<section class="slide" data-sec="Bộ dữ liệu">
-  <div class="kicker">03 · Bộ dữ liệu</div>
-  <h2>4 loại câu hỏi, luôn có đáp án và bằng chứng</h2>
-  <table>
-    <tr><th>Câu hỏi</th><th>Đáp án</th><th class="r">Đoán bừa</th></tr>
-    <tr><td>Cách đây N giây đang có hoạt động gì?</td><td>1 trong 24</td><td class="r">4,2%</td></tr>
-    <tr><td>Ở giây thứ T đang xảy ra hoạt động gì?</td><td>1 trong 24</td><td class="r">4,2%</td></tr>
-    <tr><td>Trong 4 hoạt động này, hoạt động nào đã xuất hiện?</td><td>1 trong 4</td><td class="r">25%</td></tr>
-    <tr><td>Ngay sau lần gần nhất có X là hoạt động gì?</td><td>1 trong 24</td><td class="r">4,2%</td></tr>
-  </table>
-  <p class="muted" style="margin-top:26px; font-size:20px">Bằng chứng luôn nằm trong đoạn đã kết thúc, nên không thể trả lời bằng cách nhìn khung hình hiện tại.</p>
-</section>
-
-<!-- 15. Huấn luyện: quy trình -->
-<section class="slide" data-sec="Huấn luyện và bộ mã hóa">
-  <div class="kicker">04 · Huấn luyện</div>
-  <h2>Hai giai đoạn, so sánh công bằng</h2>
-  <div class="flow" style="margin-bottom:40px">
-    <div class="step"><b>1. Bộ mã hóa</b>nhận diện hoạt động trong từng giây video</div><span class="arrow">→</span>
-    <div class="step"><b>Đặc trưng xung</b>tính một lần cho mọi clip</div><span class="arrow">→</span>
-    <div class="step a"><b>2. Bộ nhớ</b>Mixer · DMP · Nâng cấp</div>
-  </div>
-  <div class="grid2">
-    <ul>
-      <li>Cùng đặc trưng, dữ liệu, đầu hỏi đáp, số bước cập nhật</li>
-      <li>Dò tham số tốt nhất cho từng mô hình: τ của Mixer, d của DMP</li>
-      <li>Kích thước tương đương, khoảng 0,8 triệu tham số</li>
-    </ul>
-    <ul>
-      <li>Chọn mô hình theo validation, chấm test một lần trên 2.048 luồng</li>
-      <li>Train trên GPU của Modal (T4, L4)</li>
-    </ul>
-  </div>
-</section>
-
-<!-- 16. Bộ mã hóa small -->
-<section class="slide" data-sec="Huấn luyện và bộ mã hóa">
-  <div class="kicker">04 · Bộ mã hóa small</div>
-  <h2>Lần 1: bộ mã hóa sMLPNet small của Mixer-SNN</h2>
-  <div class="grid2">
-    <div>
-      <div class="muted" style="font-size:17px; margin-bottom:14px">Test, trung bình 3 seed</div>
-      <div class="bars">
-        <span>Nâng cấp</span><div class="t"><div class="b a" style="width:66%"></div></div><span class="v">43,8%</span>
-        <span>Mixer-SNN</span><div class="t"><div class="b" style="width:43%"></div></div><span class="v">28,8%</span>
-        <span>DMP-SNN</span><div class="t"><div class="b" style="width:36%"></div></div><span class="v">23,9%</span>
-      </div>
-    </div>
-    <ul>
-      <li>Bộ mã hóa chỉ nhận đúng 61,6% clip</li>
-      <li>Kể cả nhớ hoàn hảo cũng chỉ đạt tối đa 58,8%</li>
-      <li>→ Bộ mã hóa là nút thắt, cần đổi</li>
-    </ul>
-  </div>
-</section>
-
-<!-- 17. Đổi bộ mã hóa -->
-<section class="slide" data-sec="Huấn luyện và bộ mã hóa">
-  <div class="kicker">04 · Đổi bộ mã hóa</div>
-  <h2>Lần 2: Spiking ResNet18</h2>
-  <div class="grid3" style="margin-bottom:40px">
-    <div><div class="big gray">61,6% → 74,6%</div><div class="cap">nhận đúng clip</div></div>
-    <div><div class="big gray">58,8% → 74,7%</div><div class="cap">mức trần với bộ nhớ hoàn hảo</div></div>
-    <div></div>
-  </div>
-  <ul>
-    <li>Khởi tạo từ ImageNet, nơ-ron xung IF, ảnh 112×112</li>
-    <li>Đặt lại trạng thái nơ-ron mỗi 8 khung, khớp với lúc train</li>
-  </ul>
-</section>
-
-<!-- 18. So sánh small và ResNet18 -->
-<section class="slide" data-sec="Huấn luyện và bộ mã hóa">
-  <div class="kicker">04 · Đổi bộ mã hóa</div>
-  <h2>Mô hình nào hưởng lợi nhiều nhất</h2>
-  <table>
-    <tr><th>Mô hình</th><th class="r">Small</th><th class="r">Spiking ResNet18</th><th class="r">Tăng</th></tr>
-    <tr class="hl"><td>Nâng cấp</td><td class="r">43,8%</td><td class="r">56,6%</td><td class="r">+12,8</td></tr>
-    <tr><td>Mixer-SNN</td><td class="r">28,8%</td><td class="r">33,9%</td><td class="r">+5,1</td></tr>
-    <tr><td>DMP-SNN</td><td class="r">23,9%</td><td class="r">26,1%</td><td class="r">+2,2</td></tr>
-  </table>
-  <p class="muted" style="margin-top:28px; font-size:20px">Test. Với Spiking ResNet18: 60 epoch, câu hỏi có thêm đồng hồ hiện tại, áp dụng cho cả ba.</p>
-</section>
-
-<!-- 19. Kết quả cuối -->
-<section class="slide" data-sec="Kết quả sau cải tiến">
-  <div class="kicker">05 · Kết quả</div>
-  <h2>Kết quả cuối cùng</h2>
-  <table>
-    <tr><th>Mô hình</th><th class="r">Tham số</th><th class="r">Validation</th><th class="r">Test</th></tr>
-    <tr class="hl"><td>Nâng cấp (DualMemoryPlus)</td><td class="r">0,83M</td><td class="r">63,7%</td><td class="r">61,6%</td></tr>
-    <tr><td>Nâng cấp, nén hạng 64</td><td class="r">0,55M</td><td class="r">63,7%</td><td class="r">61,2%</td></tr>
-    <tr><td>CNN tốt nhất</td><td class="r">2,85M</td><td class="r">64,1%</td><td class="r">61,5%</td></tr>
-    <tr><td>Mixer-SNN</td><td class="r">0,82M</td><td class="r">37,4%</td><td class="r">34,5%</td></tr>
-    <tr><td>DMP-SNN</td><td class="r">0,34M</td><td class="r">31,7%</td><td class="r">28,4%</td></tr>
-  </table>
-  <p class="muted" style="margin-top:28px; font-size:20px">Đoán bừa 9,4% · Mức trần của bộ mã hóa 74,7%</p>
-</section>
-
-<!-- 20. Theo loại câu hỏi -->
-<section class="slide" data-sec="Kết quả sau cải tiến">
-  <div class="kicker">05 · Kết quả</div>
-  <h2>Theo loại câu hỏi</h2>
-  <div class="legend"><span><i style="background:var(--accent)"></i>Nâng cấp</span><span><i style="background:var(--gray)"></i>Mixer-SNN</span><span><i style="background:#d1d5db"></i>DMP-SNN</span></div>
-  <div class="grid2" style="gap:30px 56px">
-    <div><b style="font-size:20px">Cách đây N giây</b>
-      <div class="bars" style="grid-template-columns:0 1fr 74px; margin-top:10px">
-        <span></span><div class="t"><div class="b a" style="width:65.6%"></div></div><span class="v">65,6%</span>
-        <span></span><div class="t"><div class="b" style="width:17.6%"></div></div><span class="v">17,6%</span>
-        <span></span><div class="t"><div class="b" style="width:20.5%; background:#d1d5db"></div></div><span class="v">20,5%</span>
-      </div></div>
-    <div><b style="font-size:20px">Ở giây thứ T</b>
-      <div class="bars" style="grid-template-columns:0 1fr 74px; margin-top:10px">
-        <span></span><div class="t"><div class="b a" style="width:69%"></div></div><span class="v">69,0%</span>
-        <span></span><div class="t"><div class="b" style="width:28.1%"></div></div><span class="v">28,1%</span>
-        <span></span><div class="t"><div class="b" style="width:24.2%; background:#d1d5db"></div></div><span class="v">24,2%</span>
-      </div></div>
-    <div><b style="font-size:20px">Đã xuất hiện (4 lựa chọn)</b>
-      <div class="bars" style="grid-template-columns:0 1fr 74px; margin-top:10px">
-        <span></span><div class="t"><div class="b a" style="width:73.3%"></div></div><span class="v">73,3%</span>
-        <span></span><div class="t"><div class="b" style="width:61.2%"></div></div><span class="v">61,2%</span>
-        <span></span><div class="t"><div class="b" style="width:49.8%; background:#d1d5db"></div></div><span class="v">49,8%</span>
-      </div></div>
-    <div><b style="font-size:20px">Ngay sau X</b>
-      <div class="bars" style="grid-template-columns:0 1fr 74px; margin-top:10px">
-        <span></span><div class="t"><div class="b a" style="width:38.6%"></div></div><span class="v">38,6%</span>
-        <span></span><div class="t"><div class="b" style="width:31.3%"></div></div><span class="v">31,3%</span>
-        <span></span><div class="t"><div class="b" style="width:19.2%; background:#d1d5db"></div></div><span class="v">19,2%</span>
-      </div></div>
-  </div>
-</section>
-
-<!-- 21. Theo độ xa -->
-<section class="slide" data-sec="Kết quả sau cải tiến">
-  <div class="kicker">05 · Kết quả</div>
-  <h2>Nhớ xa không bị giảm</h2>
-  <table>
-    <tr><th>Sự kiện cách đây</th><th class="r">0–4 giây</th><th class="r">4–8 giây</th><th class="r">8–16 giây</th><th class="r">16–32 giây</th></tr>
-    <tr class="hl"><td>Nâng cấp</td><td class="r">62,1%</td><td class="r">65,4%</td><td class="r">60,2%</td><td class="r">63,0%</td></tr>
-    <tr><td>Mixer-SNN</td><td class="r">58,3%</td><td class="r">52,4%</td><td class="r">22,0%</td><td class="r">7,8%</td></tr>
-    <tr><td>DMP-SNN</td><td class="r">34,8%</td><td class="r">34,0%</td><td class="r">26,9%</td><td class="r">20,0%</td></tr>
-  </table>
-</section>
-
-<!-- 22. Giảm tham số -->
-<section class="slide" data-sec="Kết quả sau cải tiến">
-  <div class="kicker">05 · Kết quả</div>
-  <h2>Giảm 34% tham số, độ chính xác gần như giữ nguyên</h2>
-  <div class="grid2" style="grid-template-columns:1.3fr 1fr">
-    <table>
-      <tr><th></th><th class="r">Bản gốc</th><th class="r">Nén hạng 64</th></tr>
-      <tr><td>Tham số</td><td class="r">831.544</td><td class="r"><b>551.992</b></td></tr>
-      <tr><td>Validation</td><td class="r">63,73%</td><td class="r">63,68%</td></tr>
-      <tr><td>Test</td><td class="r">61,64%</td><td class="r">61,17%</td></tr>
-      <tr><td>Sự kiện 16–32 giây</td><td class="r">62,99%</td><td class="r">62,94%</td></tr>
-      <tr><td>Kích thước file</td><td class="r">3,53 MB</td><td class="r"><b>2,41 MB</b></td></tr>
-    </table>
-    <ul>
-      <li>Tách các ma trận chiếu lớn thành 2 ma trận nhỏ hạng 64 bằng SVD</li>
-      <li>Không cần train lại</li>
-      <li>Test chỉ giảm 0,47 điểm</li>
-    </ul>
-  </div>
-</section>
-
-<!-- 23. So với CNN -->
-<section class="slide" data-sec="Kết quả sau cải tiến">
-  <div class="kicker">05 · Kết quả</div>
-  <h2>So với mạng tích chập thường (CNN)</h2>
-  <table>
-    <tr><th>Mô hình</th><th class="r">Tham số</th><th class="r">Bộ nhớ trạng thái</th><th class="r">Sự kiện 16–32 giây</th><th class="r">Test</th></tr>
-    <tr><td>CNN 192 kênh</td><td class="r">0,79M</td><td class="r">–</td><td class="r">38,6%</td><td class="r">48,8%</td></tr>
-    <tr><td>CNN 384 kênh</td><td class="r">2,71M</td><td class="r">–</td><td class="r">39,6%</td><td class="r">47,9%</td></tr>
-    <tr><td>CNN 512 kênh</td><td class="r">4,64M</td><td class="r">–</td><td class="r">37,0%</td><td class="r">47,4%</td></tr>
-    <tr><td>CNN 384 kênh + bộ đệm toàn bộ quá khứ</td><td class="r">2,85M</td><td class="r">16.384 số</td><td class="r">63,6%</td><td class="r">61,5%</td></tr>
-    <tr class="hl"><td>Nâng cấp (SNN)</td><td class="r">0,83M</td><td class="r">960 số</td><td class="r">63,0%</td><td class="r">61,6%</td></tr>
-    <tr class="hl"><td>Nâng cấp, nén hạng 64</td><td class="r">0,55M</td><td class="r">960 số</td><td class="r">62,9%</td><td class="r">61,2%</td></tr>
-  </table>
-  <ul style="margin-top:24px">
-    <li>CNN to hơn không tốt hơn: cần cấu trúc nhớ chứ không cần nhiều tham số</li>
-    <li>SNN ngang CNN tốt nhất với <b>ít hơn 3,4–5,2 lần tham số</b>, bộ nhớ nhỏ hơn 17 lần, chỉ truyền xung</li>
-  </ul>
-</section>
-
-<!-- 23. Demo -->
-<section class="slide" data-sec="Demo">
-  <div class="kicker">06 · Demo</div>
-  <h2>Hỏi đáp trực tiếp trên video thật</h2>
-  <div class="grid2" style="grid-template-columns:1.15fr 1fr">
-    <div class="mock">
-      <div style="grid-row: span 2">Video đang phát<br>và dòng thời gian</div>
-      <div>Chọn loại câu hỏi,<br>N, T hoặc X</div>
-      <div>Đáp án đúng, bằng chứng<br>và câu trả lời của 3 mô hình</div>
-    </div>
-    <ul>
-      <li>40 luồng test chưa từng thấy khi train</li>
-      <li>Dừng bất kỳ lúc nào và đặt câu hỏi</li>
-      <li>So sánh 3 mô hình cùng lúc: đáp án, độ tin cậy, thời gian chạy</li>
-      <li>Khung hình sau thời điểm hỏi bị xóa trước khi đưa vào mô hình</li>
-    </ul>
-  </div>
-</section>
-
-<!-- 24. Vì sao 61% -->
-<section class="slide" data-sec="Hạn chế và hướng phát triển">
-  <div class="kicker">07 · Hạn chế</div>
-  <h2>Vì sao mới đạt 61,6%</h2>
-  <div class="grid2">
-    <div>
-      <div class="bars" style="grid-template-columns:230px 1fr 74px">
-        <span>Đoán bừa</span><div class="t"><div class="b" style="width:9.4%"></div></div><span class="v">9,4%</span>
-        <span>Nâng cấp</span><div class="t"><div class="b a" style="width:61.6%"></div></div><span class="v">61,6%</span>
-        <span>Trần của bộ mã hóa</span><div class="t"><div class="b" style="width:74.7%"></div></div><span class="v">74,7%</span>
-      </div>
-      <p class="muted" style="font-size:19px; margin-top:20px">Đã đạt 82% mức trần</p>
-    </div>
-    <ul>
-      <li>Bộ mã hóa chỉ nhận đúng khoảng 3/4 số clip</li>
-      <li>Câu “ngay sau X” mới đạt 38,6%: cần nhớ thứ tự các sự kiện, bộ nhớ hiện tại chỉ nhớ theo thời gian</li>
-      <li>Mỗi cấu hình mới chạy 1 seed do giới hạn GPU</li>
-    </ul>
-  </div>
-</section>
-
-<!-- 25. Hướng phát triển -->
-<section class="slide" data-sec="Hạn chế và hướng phát triển">
-  <div class="kicker">07 · Hướng phát triển</div>
-  <h2>Hướng phát triển</h2>
-  <div class="grid2" style="gap:24px 40px">
-    <div class="box"><h3>Bộ mã hóa tốt hơn</h3><p>Thêm kênh chuyển động giống camera sự kiện, mạng lớn hơn, cửa sổ dài hơn để nâng mức trần</p></div>
-    <div class="box"><h3>Bộ nhớ theo sự kiện</h3><p>Ghi lại mỗi lần hoạt động thay đổi để trả lời “ngay sau X”</p></div>
-    <div class="box"><h3>Mã hóa trực tiếp</h3><p>Nhận video bất kỳ từ camera hoặc file tải lên</p></div>
-    <div class="box"><h3>Phần cứng neuromorphic</h3><p>Đưa lên chip nơ-ron xung để tiết kiệm năng lượng</p></div>
-  </div>
-</section>
-
-<!-- 26. Cảm ơn -->
-<section class="slide">
-  <div class="fill" style="align-items:flex-start">
-    <h1 style="font-size:72px">Cảm ơn thầy cô<br>và các bạn đã lắng nghe</h1>
-    <p class="muted" style="margin-top:30px; font-size:24px">Đặng Thị Ngọc Thảo · Đặng Nguyễn Hữu Huy</p>
-  </div>
-</section>
-
-</div>
-<div class="nav"><button id="prev">←</button><button id="full">Toàn màn hình</button><button id="next">→</button></div>
-<script>
-const slides = [...document.querySelectorAll(".slide")];
-const deck = document.getElementById("deck");
-let current = 0;
-slides.forEach((s, i) => {
-  if (i > 0 && i < slides.length - 1) s.insertAdjacentHTML("beforeend", `<span class="num">${i + 1} / ${slides.length}</span>`);
-  if (s.dataset.sec) s.insertAdjacentHTML("beforeend", `<span class="sec">${s.dataset.sec}</span>`);
-});
-function fit() {
-  const scale = Math.min(innerWidth / 1280, innerHeight / 720) * 0.96;
-  deck.style.transform = `translate(-50%, -50%) scale(${scale})`;
-}
-function go(i) {
-  current = Math.max(0, Math.min(slides.length - 1, i));
-  slides.forEach((s, j) => s.classList.toggle("active", j === current));
-  history.replaceState(null, "", "#" + (current + 1));
-}
-addEventListener("resize", fit);
-addEventListener("keydown", e => {
-  if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) { e.preventDefault(); go(current + 1); }
-  if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) { e.preventDefault(); go(current - 1); }
-  if (e.key === "Home") go(0);
-  if (e.key === "End") go(slides.length - 1);
-  if (e.key === "f") document.documentElement.requestFullscreen?.();
-});
-addEventListener("click", e => { if (!e.target.closest(".nav")) go(current + (e.clientX > innerWidth / 3 ? 1 : -1)); });
-document.getElementById("prev").onclick = () => go(current - 1);
-document.getElementById("next").onclick = () => go(current + 1);
-document.getElementById("full").onclick = () => document.documentElement.requestFullscreen?.();
-fit();
-go((parseInt(location.hash.slice(1)) || 1) - 1);
-</script>
-</body>
+    <script>
+      const slides = [...document.querySelectorAll(".slide")];
+      const deck = document.getElementById("deck");
+      let current = 0;
+      slides.forEach((s, i) => {
+        if (i > 0 && i < slides.length - 1)
+          s.insertAdjacentHTML(
+            "beforeend",
+            `<span class="num">${i + 1} / ${slides.length}</span>`,
+          );
+      });
+      function fit() {
+        const margin = document.fullscreenElement ? 1 : 0.96;
+        const scale = Math.min(innerWidth / 1280, innerHeight / 720) * margin;
+        deck.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      }
+      function go(i) {
+        current = Math.max(0, Math.min(slides.length - 1, i));
+        slides.forEach((s, j) => s.classList.toggle("active", j === current));
+        history.replaceState(null, "", "#" + (current + 1));
+      }
+      addEventListener("resize", fit);
+      document.addEventListener("fullscreenchange", fit);
+      addEventListener("keydown", (e) => {
+        if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) {
+          e.preventDefault();
+          go(current + 1);
+        }
+        if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) {
+          e.preventDefault();
+          go(current - 1);
+        }
+        if (e.key === "Home") go(0);
+        if (e.key === "End") go(slides.length - 1);
+        if (e.key === "f") document.documentElement.requestFullscreen?.();
+      });
+      addEventListener("click", (e) => {
+        if (!e.target.closest(".nav"))
+          go(current + (e.clientX > innerWidth / 3 ? 1 : -1));
+      });
+      document.getElementById("prev").onclick = () => go(current - 1);
+      document.getElementById("next").onclick = () => go(current + 1);
+      document.getElementById("full").onclick = () =>
+        document.documentElement.requestFullscreen?.();
+      fit();
+      go((parseInt(location.hash.slice(1)) || 1) - 1);
+    </script>
+  </body>
 </html>

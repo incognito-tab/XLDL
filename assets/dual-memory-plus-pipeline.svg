@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 462" width="1120" height="462" role="img" aria-labelledby="title desc" font-family="Be Vietnam Pro, Segoe UI, sans-serif">
+  <title id="title">Hai luồng xử lý của DualMemoryPlus</title>
+  <desc id="desc">Khi video chạy, Spiking ResNet18 tạo đặc trưng cho mỗi khung. Trong mỗi tầng, đầu vào tách thành đường nhanh và đường chậm, rồi hai tín hiệu được cộng trước khi qua LIF. Đường chậm ghi 16 kênh vào ba cửa sổ Legendre. Khi có câu hỏi, mô hình đọc trực tiếp trạng thái tầng hai và dùng độ trễ để giải mã bộ nhớ của cả hai tầng. Lớp đọc và đầu trả lời nhận câu hỏi. Đầu trả lời còn nhận tỉ lệ xung gần nhất của tầng hai.</desc>
+  <defs>
+    <marker id="flow-tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0 0 10 5 0 10Z" fill="context-stroke"/>
+    </marker>
+    <style>
+      .panel { stroke-width: 1; }
+      .video-panel { fill: #f6f9fc; stroke: #d9e4ef; }
+      .query-panel { fill: #faf8fd; stroke: #e4ddf0; }
+      .input { fill: #fff; stroke: #cfdaea; }
+      .memory { fill: #eaf7f3; stroke: #99c9bb; }
+      .read { fill: #f2eefc; stroke: #c9b8ec; }
+      .question { fill: #fff5e9; stroke: #e6bc8f; }
+      .output { fill: #ebf3ff; stroke: #a9c5f1; }
+      .box { stroke-width: 1.5; }
+      .wire { fill: none; stroke-width: 2.5; stroke-linejoin: round; marker-end: url(#flow-tip); }
+      .signal { stroke: #3168b5; }
+      .slow-signal { stroke: #217963; }
+      .readout { stroke: #7454af; }
+      .query { stroke: #b36322; }
+      .heading { fill: #18243a; font-size: 21px; font-weight: 700; }
+      .name { fill: #18243a; font-size: 18px; font-weight: 700; }
+      .detail { fill: #42536c; font-size: 15px; }
+      .note { fill: #42536c; font-size: 14px; }
+      .branch-name { fill: #18243a; font-size: 14px; font-weight: 700; }
+    </style>
+    <g id="layer-paths">
+      <rect class="box input" x="0" y="38" width="346" height="143" rx="11"/>
+      <rect class="box output" x="32" y="67" width="187" height="35" rx="8"/>
+      <rect class="box memory" x="32" y="122" width="187" height="49" rx="8"/>
+      <rect class="box output" x="254" y="91" width="76" height="48" rx="8"/>
+
+      <path class="wire signal" d="M0 115H17V84H31"/>
+      <path class="wire slow-signal" d="M17 115V146H31"/>
+      <circle cx="17" cy="115" r="3.2" fill="#3168b5"/>
+      <path class="wire signal" d="M219 84H235V103H253"/>
+      <path class="wire slow-signal" d="M219 146H235V127H253"/>
+      <path d="M330 115H346" fill="none" stroke="#3168b5" stroke-width="2.5"/>
+
+      <g text-anchor="middle">
+        <text class="branch-name" x="125" y="89">Đường nhanh</text>
+        <text class="branch-name" x="125" y="141">Đường chậm · 16 kênh</text>
+        <text class="note" x="125" y="160">3 cửa sổ 2, 8 và 32 giây</text>
+        <text class="branch-name" x="292" y="120">Cộng → LIF</text>
+      </g>
+    </g>
+  </defs>
+
+  <g aria-label="Khi video chạy">
+    <rect class="panel video-panel" x="1" y="1" width="1118" height="197" rx="16"/>
+    <text class="heading" x="20" y="31">Khi video chạy</text>
+
+    <rect class="box input" x="19" y="81" width="100" height="68" rx="10"/>
+    <rect class="box input" x="142" y="81" width="142" height="68" rx="10"/>
+    <use href="#layer-paths" x="326"/>
+    <use href="#layer-paths" x="720"/>
+
+    <path class="wire signal" d="M119 115H141"/>
+    <path class="wire signal" d="M284 115H325"/>
+    <path class="wire signal" d="M672 115H719"/>
+    <path class="wire signal" d="M1066 115H1103"/>
+
+    <g text-anchor="middle">
+      <text class="name" x="69" y="111">Video</text>
+      <text class="detail" x="69" y="133">8 khung/giây</text>
+      <text class="name" x="213" y="111">Bộ mã hóa</text>
+      <text class="detail" x="213" y="133">Spiking ResNet18</text>
+      <text class="name" x="499" y="59">Tầng 1</text>
+      <text class="note" x="696" y="105">Xung</text>
+      <text class="name" x="893" y="59">Tầng 2</text>
+      <text class="note" x="1086" y="105">Xung</text>
+    </g>
+  </g>
+
+  <g aria-label="Khi có câu hỏi">
+    <rect class="panel query-panel" x="1" y="211" width="1118" height="249" rx="16"/>
+    <text class="heading" x="20" y="240">Khi có câu hỏi</text>
+
+    <rect class="box question" x="20" y="308" width="195" height="78" rx="10"/>
+    <text class="name" x="117" y="353" text-anchor="middle">Câu hỏi</text>
+
+    <rect class="box read" x="333" y="257" width="223" height="64" rx="10"/>
+    <text class="name" x="444" y="283" text-anchor="middle">Đọc trực tiếp</text>
+    <text class="detail" x="444" y="306" text-anchor="middle">3 cửa sổ tầng 2 tại lúc hỏi</text>
+
+    <rect class="box read" x="333" y="338" width="223" height="70" rx="10"/>
+    <text class="name" x="444" y="363" text-anchor="middle">Giải mã Legendre</text>
+    <text class="detail" x="444" y="388" text-anchor="middle">Cả hai tầng, cùng mốc hỏi</text>
+
+    <path class="wire query" d="M215 372H332"/>
+    <path class="wire readout" d="M556 287H603V295H650"/>
+    <path class="wire readout" d="M556 373H612V317H650"/>
+
+    <rect class="box read" x="651" y="270" width="218" height="80" rx="10"/>
+    <text class="name" x="760" y="305" text-anchor="middle">Lớp đọc bộ nhớ</text>
+    <text class="note" x="760" y="329" text-anchor="middle">Chiếu → chuẩn hóa → LIF</text>
+
+    <rect class="box output" x="918" y="270" width="181" height="80" rx="10"/>
+    <text class="name" x="1008" y="303" text-anchor="middle">Đầu trả lời</text>
+    <text class="detail" x="1008" y="328" text-anchor="middle">Chọn nhãn hoạt động</text>
+    <path class="wire readout" d="M869 300H917"/>
+    <rect class="box output" x="918" y="370" width="181" height="51" rx="10"/>
+    <text class="name" x="1008" y="392" text-anchor="middle" style="font-size:16px">Tỉ lệ xung tầng 2</text>
+    <text class="note" x="1008" y="412" text-anchor="middle">Tối đa 8 khung gần nhất</text>
+    <path class="wire signal" d="M1008 370V351"/>
+
+    <path class="wire query" d="M117 386V441H633V337H650"/>
+    <path class="wire query" d="M633 441H894V332H917"/>
+    <circle cx="633" cy="441" r="3.5" fill="#b36322"/>
+  </g>
+</svg>
